@@ -1,0 +1,17 @@
+[project]
+name = "frc3484-lib"
+version = "0.1"
+description = "frc team 3484's helpful python library"
+readme = "README.md"
+authors = [
+    { name = "thelegendofmario", email = "ethanfrancis577@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "photonlibpy>=2026.0.1",
+    "robotpy[commands2,pathplannerlib,phoenix6]>=2025.3.2.2",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.7,<0.10.0"]
+build-backend = "uv_build"
