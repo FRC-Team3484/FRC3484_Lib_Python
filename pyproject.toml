@@ -1,26 +1,26 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "frc3484-lib"
 version = "0.1"
-description = "frc team 3484's helpful python library"
+description = "FRC Team 3484's python library for frequently used code"
 readme = "README.md"
 authors = [
-    { name = "thelegendofmario", email = "ethanfrancis577@gmail.com" }
+    { name = "thelegendofmario", email = "ethanfrancis577@gmail.com" },
+    { name = "Jakob Spurgat", email = "jakob@spurgat.net" }
 ]
-requires-python = ">=3.12"
+maintainers = [
+    { name = "FRC Team 3484" },
+]
+requires-python = ">=3.11"
 dependencies = [
-    "photonlibpy>=2026.0.1",
-    "robotpy[commands2,pathplannerlib,phoenix6]>=2025.3.2.2",
+    "wpilib",
+    "robotpy",
+    "robotpy-commands-v2",
+    "robotpy-pathplannerlib",
+    "phoenix6",
+    "photonlibpy",
+    "robotpy-apriltag",
 ]
 
-[tool.setuptools]
-package-dir = {"" = "frc3484_lib"}
-
-[tool.setuptools.packages.find]
-where = ["frc3484_lib"]
-
-[tool.setuptools.package-data]
-"frc3484_lib.data" = ["*.yaml"]
+[build-system]
+requires = ["uv_build>=0.9.17,<0.10.0"]
+build-backend = "uv_build"
