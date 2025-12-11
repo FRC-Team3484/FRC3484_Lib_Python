@@ -22,8 +22,6 @@ and OI can use the GenericController to read those inputs as whatever type we ne
 We can also apply pre-processing such as deadbands, edge detection, and error handling in GameController to keep OI lightweight.
 '''
 
-
-
 class SC_Controller(Subsystem):
     '''
     Controller class that wraps a GenericHID and provides the following features:
