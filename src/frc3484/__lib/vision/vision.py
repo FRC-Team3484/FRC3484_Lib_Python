@@ -13,7 +13,7 @@ from photonlibpy.targeting.photonPipelineResult import PhotonPipelineResult
 from photonlibpy.photonPoseEstimator import PhotonPoseEstimator
 from photonlibpy.estimatedRobotPose import EstimatedRobotPose
 
-from .._datatypes.pathing_datatypes import SC_CameraConfig, SC_CameraResults
+from ..datatypes.pathing_datatypes import SC_CameraConfig, SC_CameraResults
 
 
 class SC_Vision:

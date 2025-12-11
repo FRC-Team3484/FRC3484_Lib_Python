@@ -1,5 +1,5 @@
 [project]
-name = "frc3484-lib"
+name = "frc3484"
 version = "0.1"
 description = "FRC Team 3484's python library for frequently used code"
 readme = "README.md"

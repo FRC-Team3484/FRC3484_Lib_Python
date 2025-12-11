@@ -11,7 +11,7 @@ from pathplannerlib.path import PathPlannerPath, GoalEndState
 
 from .config import PathfindingConfig, FinalAlignmentConfig
 from .final_alignment_command import FinalAlignmentCommand
-from .._datatypes.pathing_datatypes import SC_ApriltagTarget
+from ..datatypes.pathing_datatypes import SC_ApriltagTarget
 
 class SC_Pathfinding:
     """
