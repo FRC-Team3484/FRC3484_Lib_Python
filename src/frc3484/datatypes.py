@@ -1,8 +1,8 @@
-from .datatypes.pathing_datatypes import \
+from .__lib.datatypes.pathing_datatypes import \
     SC_CameraConfig, \
     SC_CameraResults, \
     SC_ApriltagTarget
-from .datatypes.motion_datatypes import \
+from .__lib.datatypes.motion_datatypes import \
     SC_LauncherSpeed, \
     SC_PIDConfig, \
     SC_SolenoidConfig, \
@@ -10,7 +10,7 @@ from .datatypes.motion_datatypes import \
     SC_AngularFeedForwardConfig, \
     SC_LinearFeedForwardConfig, \
     SC_MotorConfig
-from .datatypes.swerve_datatypes import \
+from .__lib.datatypes.swerve_datatypes import \
     SC_SwerveConfig, \
     SC_SwerveCurrentConfig, \
     SC_DrivePIDConfig, \
