@@ -16,7 +16,7 @@ from photonlibpy.estimatedRobotPose import EstimatedRobotPose
 from .._datatypes.pathing_datatypes import SC_CameraConfig, SC_CameraResults
 
 
-class Vision:
+class SC_Vision:
     """
     A class for handling vision processing
 
