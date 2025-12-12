@@ -1,5 +1,9 @@
 from dataclasses import dataclass
 
+from typing import Literal
+
+from phoenix6.signals import NeutralModeValue
+
 from wpimath.units import \
     seconds, \
     volts, \
@@ -8,7 +12,12 @@ from wpimath.units import \
     volt_seconds_per_radian, \
     volt_seconds_squared_per_radian, \
     volt_seconds_per_meter, \
-    volt_seconds_squared_per_meter
+    volt_seconds_squared_per_meter, \
+    inches, \
+    feet_per_second, \
+    feet_per_second_squared, \
+    degrees_per_second, \
+    degrees_per_second_squared
 
 from wpilib import PneumaticsModuleType
 
@@ -55,8 +64,22 @@ class SC_MotorConfig:
     can_id: int
     inverted: bool = False
     can_bus_name: str = "rio"
-    
+
+    neutral_mode: NeutralModeValue = NeutralModeValue.BRAKE
+
+    motor_type: Literal["falcon", "minion"] = "falcon"
+
     current_limit_enabled: bool = True
     current_threshold: amperes = 50
     current_time: seconds = 0.1
     current_limit: amperes = 20
+
+@dataclass(frozen=True)
+class SC_PositionControl:
+    speed: float
+    position: inches
+
+@dataclass(frozen=True)
+class SC_TrapezoidConfig:
+    max_velocity: feet_per_second | degrees_per_second
+    max_acceleration: feet_per_second_squared | degrees_per_second_squared

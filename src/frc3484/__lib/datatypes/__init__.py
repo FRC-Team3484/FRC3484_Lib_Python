@@ -6,11 +6,13 @@ from .motion_datatypes import \
     SC_AngularFeedForwardConfig, \
     SC_LinearFeedForwardConfig, \
     SC_MotorConfig
+
 from .swerve_datatypes import \
     SC_SwerveConfig, \
     SC_SwerveCurrentConfig, \
     SC_DrivePIDConfig, \
     SC_SteerPIDConfig
+
 from .pathing_datatypes import \
     SC_CameraConfig, \
     SC_CameraResults, \
