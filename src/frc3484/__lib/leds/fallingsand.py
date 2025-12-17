@@ -1,6 +1,6 @@
 from wpilib import AddressableLED, LEDPattern, Color
 from wpimath.units import meters, meters_per_second, meters_per_second_squared
-from typing import Iterable, List
+from typing import Iterable
 
 from enum import Enum
 
@@ -10,7 +10,7 @@ class PatternState(Enum):
 
 class FallingSand:
     def __init__(self, colors: Iterable[Color], bar_size: int, led_spacing: meters, intake_velocity: meters_per_second, exit_acceleration: meters_per_second_squared, fill_size: int, gamma: float) -> None:
-        self._colors: List[Color] = []
+        self._colors: list[Color] = []
         for color in colors:
             self._colors.append(self._correct_gamma(color))
         self._bar_size: int = bar_size
@@ -30,7 +30,7 @@ class FallingSand:
         self._falling_led_position = 0.0
         self._state = PatternState.fill
 
-    def _apply_to(self, data: List[AddressableLED.LEDData]):
+    def _apply_to(self, data: list[AddressableLED.LEDData]):
         match self._state: 
             case PatternState.fill:
                 for i in range(len(data)):
