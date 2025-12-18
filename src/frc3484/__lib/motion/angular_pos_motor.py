@@ -49,6 +49,8 @@ class AngularPositionMotor(PowerMotor):
         # Set up variables
         self._state: State = State.POWER
 
+
+
         self._pid_controller: PIDController = PIDController(pid_config.Kp, pid_config.Ki, pid_config.Kd)
         self._feed_forward_controller: SimpleMotorFeedforwardMeters = SimpleMotorFeedforwardMeters(feed_forward_config.S, feed_forward_config.V, feed_forward_config.A)
         self._motor_name: str = str(self._motor.device_id)
@@ -74,12 +76,14 @@ class AngularPositionMotor(PowerMotor):
         if type(self._motor_config) is TalonFXSConfiguration:
             if self._encoder is not None:
                 self._motor_config.external_feedback = ExternalFeedbackConfigs() \
+                    .with_rotor_to_sensor_ratio(gear_ratio) \
                     .with_feedback_remote_sensor_id(self._encoder.device_id) \
                     .with_external_feedback_sensor_source(ExternalFeedbackSensorSourceValue.REMOTE_CANCODER)
 
         elif type(self._motor_config) is TalonFXConfiguration:
             if self._encoder is not None:
                 self._motor_config.feedback = FeedbackConfigs() \
+                    .with_rotor_to_sensor_ratio(gear_ratio) \
                     .with_feedback_remote_sensor_id(self._encoder.device_id) \
                     .with_feedback_sensor_source(FeedbackSensorSourceValue.REMOTE_CANCODER)
         else:
