@@ -4,8 +4,8 @@ from wpilib import SmartDashboard
 from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters
 from wpimath.units import volts
 
-from src.FRC3484_Lib.SC_Datatypes import SC_LinearFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_CurrentConfig, SC_VelocityControl
-from src.FRC3484_Lib.motor_templates.power_motor import PowerMotor
+from ..datatypes import SC_LinearFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_LauncherSpeed
+from .power_motor import PowerMotor
 
 
 class VelocityMotor(PowerMotor):
@@ -25,22 +25,21 @@ class VelocityMotor(PowerMotor):
     def __init__(
         self, 
         motor_config: SC_MotorConfig, 
-        current_config: SC_CurrentConfig, 
         pid_config: SC_PIDConfig, 
         feed_forward_config: SC_LinearFeedForwardConfig,
         gear_ratio: float, 
         tolerance: float
     ) -> None:
-        super().__init__(motor_config, current_config)
+        super().__init__(motor_config)
 
         self._pid_controller: PIDController = PIDController(pid_config.Kp, pid_config.Ki, pid_config.Kd)
         self._feed_forward_controller: SimpleMotorFeedforwardMeters = SimpleMotorFeedforwardMeters(feed_forward_config.S, feed_forward_config.V, feed_forward_config.A)
 
-        self._target_speed: SC_VelocityControl = SC_VelocityControl(0.0, 0.0)
+        self._target_speed: SC_LauncherSpeed = SC_LauncherSpeed(0.0, 0.0)
 
         self._tolerance: float = tolerance
         self._gear_ratio: float = gear_ratio
-        self._motor_name: str = motor_config.motor_name
+        self._motor_name: str = str(self._motor.device_id)
 
     @override
     def periodic(self) -> None:
@@ -49,7 +48,7 @@ class VelocityMotor(PowerMotor):
         '''
         if not SmartDashboard.getBoolean(f"{self._motor_name} Test Mode", False):
             if self._target_speed.power == 0.0 and self._target_speed.speed == 0.0:
-                self._pid_controller.reset(0)
+                self._pid_controller.reset()
                 self._motor.setVoltage(0)
 
             elif self._target_speed.power != 0.0:
@@ -63,14 +62,14 @@ class VelocityMotor(PowerMotor):
         if SmartDashboard.getBoolean(f"{self._motor_name} Diagnostics", False):
             self.print_diagnostics()
     
-    def set_speed(self, speed: SC_VelocityControl) -> None:
+    def set_speed(self, speed: SC_LauncherSpeed) -> None:
         '''
         Sets the target speed for the motor
 
         Parameters:
             - speed (SC_TemplateMotorVelocityControl): The speed and power to set the motor to
         '''
-        self._target_speed = SC_VelocityControl(speed.speed * self._gear_ratio, speed.power)
+        self._target_speed = SC_LauncherSpeed(speed.speed * self._gear_ratio, speed.power)
 
     def at_target_speed(self) -> bool:
         '''
@@ -98,7 +97,7 @@ class VelocityMotor(PowerMotor):
         '''
         # TODO: Have a boolean for testing mode to disable PID and feed forward
         # TODO: Should this really override the set_speed method from PowerMotor?
-        self._target_speed = SC_VelocityControl(0.0, power)
+        self._target_speed = SC_LauncherSpeed(0.0, power)
     
     @override
     def print_diagnostics(self) -> None:
