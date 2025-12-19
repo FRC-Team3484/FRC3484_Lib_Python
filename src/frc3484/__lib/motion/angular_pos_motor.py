@@ -101,7 +101,7 @@ class AngularPositionMotor(PowerMotor):
         if self._state == State.POSITION:
             current_state = self._trapezoid.calculate(self._trapezoid_timer.get(), self._initial_state, self._target_state)
             feed_forward = self._feed_forward_controller.calculate(self._previous_velocity, current_state.velocity)
-            pid = self._pid_controller.calculate(self.get_angle(), current_state.position)
+            pid = self._pid_controller.calculate(self.get_position(), current_state.position)
 
             self._motor.setVoltage(pid + feed_forward)
             self._previous_velocity = current_state.velocity
@@ -109,23 +109,23 @@ class AngularPositionMotor(PowerMotor):
         if SmartDashboard.getBoolean(f"{self._motor_name} Diagnostics", defaultValue=False):
             self.print_diagnostics()
 
-    def at_target_angle(self) -> bool:
+    def at_target_position(self) -> bool:
         '''
         Returns whether the motor is at the target angle or not
 
         Returns:
             - bool: True if the motor is at the target angle, False otherwise
         '''
-        return abs(self._target_state.position - self.get_angle()) < self._angle_tolerance
+        return abs(self._target_state.position - self.get_position()) < self._angle_tolerance
 
-    def get_angle(self) -> degrees:
+    def get_position(self) -> degrees:
         '''
         Returns the current angle of the motor
 
         Returns:
             - degrees: The current angle of the motor
         '''
-        return self._motor.get_position().value / self._gear_ratio
+        return (self._motor.get_position().value / self._gear_ratio) * 360
 
     def get_velocity(self) -> degrees_per_second:
         '''
@@ -134,7 +134,7 @@ class AngularPositionMotor(PowerMotor):
         Returns:
             - degrees_per_second: The current velocity of the motor
         '''
-        return self._motor.get_velocity().value / self._gear_ratio
+        return (self._motor.get_velocity().value / self._gear_ratio) * 360
 
     def set_power(self, power: float) -> None:
         '''
@@ -146,7 +146,7 @@ class AngularPositionMotor(PowerMotor):
         self._state = State.POWER
         self._motor.set(power)
 
-    def set_target_angle(self, angle: degrees) -> None:
+    def set_target_position(self, position: degrees) -> None:
         '''
         Sets the target angle of the motor
 
@@ -155,9 +155,9 @@ class AngularPositionMotor(PowerMotor):
         '''
         self._state = State.POSITION
         
-        if angle != self._target_state.position:
-            self._target_state = TrapezoidProfile.State(angle, 0)
-            self._initial_state = TrapezoidProfile.State(self.get_angle(), self.get_velocity())
+        if position != self._target_state.position:
+            self._target_state = TrapezoidProfile.State(position, 0)
+            self._initial_state = TrapezoidProfile.State(self.get_position(), self.get_velocity())
 
             self._trapezoid_timer.reset()
 
@@ -166,7 +166,7 @@ class AngularPositionMotor(PowerMotor):
         '''
         Prints diagnostic information to Smart Dashboard
         '''
-        _ = SmartDashboard.putNumber(f"{self._motor_name} Angle (degrees)", self.get_angle())
+        _ = SmartDashboard.putNumber(f"{self._motor_name} position (degrees)", self.get_position())
         _ = SmartDashboard.putNumber(f"{self._motor_name} Velocity", self.get_velocity())
-        _ = SmartDashboard.putBoolean(f"{self._motor_name} At Target Angle", self.at_target_angle())
+        _ = SmartDashboard.putBoolean(f"{self._motor_name} At Target position", self.at_target_position())
         super().print_diagnostics()

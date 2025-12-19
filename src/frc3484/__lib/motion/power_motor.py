@@ -2,6 +2,7 @@ from commands2 import Subsystem
 
 from phoenix6.hardware import TalonFX, TalonFXS
 from phoenix6.configs import CurrentLimitsConfigs, TalonFXConfiguration, TalonFXSConfiguration
+from phoenix6.controls import Follower
 from phoenix6.signals import InvertedValue, MotorArrangementValue, NeutralModeValue
 from wpilib import SmartDashboard
 
@@ -59,6 +60,11 @@ class PowerMotor(Subsystem):
         _ = self._motor.configurator.apply(self._motor_config)
 
         _ = SmartDashboard.putBoolean(f"{self._motor.device_id} Diagnostics", False)
+        self._motor_inverted = motor_config.inverted
+
+    @property
+    def device_id(self) -> int:
+        return self._motor.device_id
 
     def periodic(self) -> None:
         '''
@@ -101,6 +107,9 @@ class PowerMotor(Subsystem):
             return (self._motor.get_supply_current().value / (self._motor.get_motor_stall_current().value * self._motor.get_supply_voltage().value / 12.0)) / abs(self._motor.get())
         else:
             return 0
+        
+    def follow(self, motor: "PowerMotor") -> None:
+        Follower(motor.device_id, self._motor_inverted)
 
     def get_stalled(self) -> bool:
         '''
@@ -115,6 +124,6 @@ class PowerMotor(Subsystem):
         '''
         Prints diagnostic information to Smart Dashboard
         '''
-        _ = SmartDashboard.putNumber(f"Motor {self._motor.device_id} Power (%)", self._motor.get() * 100)
-        _ = SmartDashboard.putNumber(f"Motor {self._motor.device_id} Stall Percentage", self.get_stall_percentage())
-        _ = SmartDashboard.putBoolean(f"Motor {self._motor.device_id} Stalled", self.get_stalled())
+        _ = SmartDashboard.putNumber(f"Motor {self.device_id} Power (%)", self._motor.get() * 100)
+        _ = SmartDashboard.putNumber(f"Motor {self.device_id} Stall Percentage", self.get_stall_percentage())
+        _ = SmartDashboard.putBoolean(f"Motor {self.device_id} Stalled", self.get_stalled())

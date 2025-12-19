@@ -1,8 +1,10 @@
 from enum import Enum
 from typing import final, override
 
+from math import pi
+
 from wpilib import SmartDashboard
-from wpimath.units import feet, feet_per_second
+from wpimath.units import feet, feet_per_second, inches
 
 from phoenix6.hardware import CANcoder
 
@@ -38,6 +40,7 @@ class LinearPositionMotor(AngularPositionMotor):
             feed_forward_config: SC_LinearFeedForwardConfig,
             trapezoid_config: SC_TrapezoidConfig,
             position_tolerance: feet,
+            pulley_radius: inches,
             gear_ratio: float = 1.0,
             external_encoder: CANcoder | None = None
         ) -> None:
@@ -52,6 +55,7 @@ class LinearPositionMotor(AngularPositionMotor):
         )
 
         self._position_tolerance: feet = position_tolerance
+        self._pulley_radius: inches = pulley_radius
 
     def at_target_position(self) -> bool:
         '''
@@ -69,7 +73,7 @@ class LinearPositionMotor(AngularPositionMotor):
         Returns:
             - feet: The current angle of the motor
         '''
-        return super().get_angle() / self._gear_ratio
+        return super().get_position() * 2 * pi * self._pulley_radius
 
     @override
     def get_velocity(self) -> feet_per_second:
@@ -79,8 +83,9 @@ class LinearPositionMotor(AngularPositionMotor):
         Returns:    
             - feet_per_second: The current velocity of the motor
         '''
-        return super().get_velocity() / self._gear_ratio
-
+        return super().get_velocity() * 2 * pi * self._pulley_radius
+    
+    @override
     def set_target_position(self, position: feet) -> None:
         '''
         Sets the target position of the motor
@@ -88,7 +93,7 @@ class LinearPositionMotor(AngularPositionMotor):
         Parameters:
             - position (feet): The angle to set the motor to
         '''
-        super().set_target_angle(position * self._gear_ratio)
+        super().set_target_position(position * self._gear_ratio)
 
     @override
     def print_diagnostics(self) -> None:
