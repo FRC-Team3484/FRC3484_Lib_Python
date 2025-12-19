@@ -10,7 +10,7 @@ from phoenix6.hardware import CANcoder
 from phoenix6.configs import ExternalFeedbackConfigs, FeedbackConfigs, TalonFXSConfiguration, TalonFXConfiguration
 from phoenix6.signals import ExternalFeedbackSensorSourceValue, FeedbackSensorSourceValue
 
-from ..motion.power_motor import PowerMotor
+from .power_motor import PowerMotor
 from ..datatypes.motion_datatypes import SC_AngularFeedForwardConfig, SC_LinearFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_TrapezoidConfig
 
 class State(Enum):
