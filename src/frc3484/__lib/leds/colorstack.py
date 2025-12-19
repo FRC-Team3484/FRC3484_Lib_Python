@@ -1,5 +1,5 @@
-from wpilib import LEDPattern, AddressableLED, Color
-from wpimath.units import meters, meters_per_second
+from wpilib import AddressableLED, Color
+from wpimath.units import meters_per_second
 from typing import Iterable
 
 from enum import Enum
@@ -9,7 +9,7 @@ class PatternState(Enum):
     empty = 1
 
 class ColorStack :
-    def __init__(self, colors: Iterable[Color], bar_size: int, led_spacing: meters, velocity: meters_per_second, fill_size: int, empty_size: int, gamma: float) -> None:
+    def __init__(self, colors: Iterable[Color], bar_size: int, velocity: meters_per_second, fill_size: int, empty_size: int, gamma: float) -> None:
         self._colors: list[Color] = []
         for color in colors:
             self._colors.append(self._correct_gamma(color))

@@ -1,4 +1,4 @@
-from wpilib import AddressableLED, LEDPattern, Color
+from wpilib import AddressableLED, Color
 from wpimath.units import meters, meters_per_second, meters_per_second_squared
 from typing import Iterable
 
