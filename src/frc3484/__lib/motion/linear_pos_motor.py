@@ -6,7 +6,9 @@ from math import pi
 from wpilib import SmartDashboard
 from wpimath.units import feet, feet_per_second, inches
 
+from phoenix6 import controls
 from phoenix6.hardware import CANcoder
+from phoenix6.configs import CurrentLimitsConfigs, Slot0Configs
 
 from .angular_pos_motor import AngularPositionMotor
 from ..datatypes.motion_datatypes import SC_LinearFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_TrapezoidConfig
@@ -54,8 +56,31 @@ class LinearPositionMotor(AngularPositionMotor):
             external_encoder=external_encoder
         )
 
+        self._open_loop_request: controls.DutyCycleOut = controls.DutyCycleOut(0.0, enable_foc=False)
+        self._closed_loop_request: controls.VelocityVoltage = controls.VelocityVoltage(0.0, slot=0, enable_foc=False)
+
         self._position_tolerance: feet = position_tolerance
         self._pulley_radius: inches = pulley_radius
+
+        self._motor_config.current_limits = CurrentLimitsConfigs() \
+            .with_supply_current_limit_enable(motor_config.current_limit_enabled) \
+            .with_supply_current_limit(motor_config.current_limit) \
+            .with_supply_current_lower_limit(motor_config.current_threshold) \
+            .with_supply_current_lower_time(motor_config.current_time) 
+
+        self._motor_config.slot0 = Slot0Configs() \
+            .with_k_p(pid_config.Kp) \
+            .with_k_i(pid_config.Ki) \
+            .with_k_d(pid_config.Kd) \
+            .with_k_v(feed_forward_config.V) \
+            .with_k_a(feed_forward_config.A) \
+            .with_k_s(feed_forward_config.S) \
+            .with_k_g(feed_forward_config.G)
+
+        self._motor_motion_magic = self._motor_config.motion_magic
+        self._motor_motion_magic.motion_magic_cruise_velocity = trapezoid_config.max_velocity
+        self._motor_motion_magic.motion_magic_acceleration = trapezoid_config.max_acceleration
+        self._motor_motion_magic.motion_magic_jerk = trapezoid_config.max_jerk
 
     def at_target_position(self) -> bool:
         '''

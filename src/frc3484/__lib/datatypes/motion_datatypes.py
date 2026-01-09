@@ -19,6 +19,10 @@ from wpimath.units import \
     degrees_per_second, \
     degrees_per_second_squared
 
+feet_per_second_cubed = float
+degrees_per_second_cubed = float
+
+
 from wpilib import PneumaticsModuleType
 
 @dataclass(frozen=True)
@@ -83,3 +87,4 @@ class SC_PositionControl:
 class SC_TrapezoidConfig:
     max_velocity: feet_per_second | degrees_per_second
     max_acceleration: feet_per_second_squared | degrees_per_second_squared
+    max_jerk: feet_per_second_cubed | degrees_per_second_cubed
