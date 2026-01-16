@@ -1,13 +1,15 @@
 from enum import Enum
 from typing import override
 
-from wpilib import Timer, SmartDashboard
+from wpilib import SmartDashboard
 from wpimath.units import degrees, degrees_per_second
-from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters
-from wpimath.trajectory import TrapezoidProfile
+# from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters
+# from wpimath.trajectory import TrapezoidProfile
 
+
+from phoenix6 import controls
 from phoenix6.hardware import CANcoder
-from phoenix6.configs import ExternalFeedbackConfigs, FeedbackConfigs, TalonFXSConfiguration, TalonFXConfiguration
+from phoenix6.configs import ExternalFeedbackConfigs, FeedbackConfigs, TalonFXSConfiguration, TalonFXConfiguration, CurrentLimitsConfigs, Slot0Configs
 from phoenix6.signals import ExternalFeedbackSensorSourceValue, FeedbackSensorSourceValue
 
 from .power_motor import PowerMotor
@@ -51,22 +53,35 @@ class AngularPositionMotor(PowerMotor):
 
 
 
-        self._pid_controller: PIDController = PIDController(pid_config.Kp, pid_config.Ki, pid_config.Kd)
-        self._feed_forward_controller: SimpleMotorFeedforwardMeters = SimpleMotorFeedforwardMeters(feed_forward_config.S, feed_forward_config.V, feed_forward_config.A)
         self._motor_name: str = str(self._motor.device_id)
-
-        self._trapezoid: TrapezoidProfile = TrapezoidProfile(TrapezoidProfile.Constraints(trapezoid_config.max_velocity, trapezoid_config.max_acceleration))
-        self._trapezoid_timer: Timer = Timer()
 
         self._encoder: CANcoder | None = external_encoder
 
-        self._initial_state: TrapezoidProfile.State = TrapezoidProfile.State(0.0, 0.0)
-        self._target_state: TrapezoidProfile.State = TrapezoidProfile.State(0.0, 0.0)
-
-        self._previous_velocity: degrees_per_second = 0
-
         self._gear_ratio: float = gear_ratio
         self._angle_tolerance: degrees = angle_tolerance
+
+        self._open_loop_request: controls.DutyCycleOut = controls.DutyCycleOut(0.0, enable_foc=False)
+        self._closed_loop_request: controls.MotionMagicVoltage = controls.MotionMagicVoltage(0.0, slot=0, enable_foc=False)
+
+        self._motor_config.current_limits = CurrentLimitsConfigs() \
+            .with_supply_current_limit_enable(motor_config.current_limit_enabled) \
+            .with_supply_current_limit(motor_config.current_limit) \
+            .with_supply_current_lower_limit(motor_config.current_threshold) \
+            .with_supply_current_lower_time(motor_config.current_time) 
+
+        self._motor_config.slot0 = Slot0Configs() \
+            .with_k_p(pid_config.Kp) \
+            .with_k_i(pid_config.Ki) \
+            .with_k_d(pid_config.Kd) \
+            .with_k_v(feed_forward_config.V) \
+            .with_k_a(feed_forward_config.A) \
+            .with_k_s(feed_forward_config.S) \
+            .with_k_g(feed_forward_config.G)
+
+        self._motor_motion_magic = self._motor_config.motion_magic
+        self._motor_motion_magic.motion_magic_cruise_velocity = trapezoid_config.max_velocity
+        self._motor_motion_magic.motion_magic_acceleration = trapezoid_config.max_acceleration
+        self._motor_motion_magic.motion_magic_jerk = trapezoid_config.max_jerk
 
         # Set up motor
 
@@ -75,6 +90,7 @@ class AngularPositionMotor(PowerMotor):
         # The portion for the external encoder is here, but the rest of the configuration is in the PowerMotor class
         if type(self._motor_config) is TalonFXSConfiguration:
             if self._encoder is not None:
+                self._gear_ratio = 1.0
                 self._motor_config.external_feedback = ExternalFeedbackConfigs() \
                     .with_rotor_to_sensor_ratio(gear_ratio) \
                     .with_feedback_remote_sensor_id(self._encoder.device_id) \
@@ -82,6 +98,7 @@ class AngularPositionMotor(PowerMotor):
 
         elif type(self._motor_config) is TalonFXConfiguration:
             if self._encoder is not None:
+                self._gear_ratio = 1.0
                 self._motor_config.feedback = FeedbackConfigs() \
                     .with_rotor_to_sensor_ratio(gear_ratio) \
                     .with_feedback_remote_sensor_id(self._encoder.device_id) \
@@ -91,21 +108,18 @@ class AngularPositionMotor(PowerMotor):
 
         _ = self._motor.configurator.apply(self._motor_config)        
 
-        self._trapezoid_timer.start()
+
 
     @override
     def periodic(self) -> None:
         '''
         Handles controlling the motors in position mode and printing diagnostics
         '''
-        if self._state == State.POSITION:
-            current_state = self._trapezoid.calculate(self._trapezoid_timer.get(), self._initial_state, self._target_state)
-            feed_forward = self._feed_forward_controller.calculate(self._previous_velocity, current_state.velocity)
-            pid = self._pid_controller.calculate(self.get_position(), current_state.position)
-
-            self._motor.setVoltage(pid + feed_forward)
-            self._previous_velocity = current_state.velocity
-
+        match self._state:
+            case State.POSITION:
+                self._motor.set_control(self._closed_loop_request)
+            case State.POWER:
+                self._motor.set_control(self._open_loop_request)
         if SmartDashboard.getBoolean(f"{self._motor_name} Diagnostics", defaultValue=False):
             self.print_diagnostics()
 
@@ -116,7 +130,7 @@ class AngularPositionMotor(PowerMotor):
         Returns:
             - bool: True if the motor is at the target angle, False otherwise
         '''
-        return abs(self._target_state.position - self.get_position()) < self._angle_tolerance
+        return abs(self._closed_loop_request.position - self._motor.get_position().value) < self._angle_tolerance
 
     def get_position(self) -> degrees:
         '''
@@ -143,8 +157,8 @@ class AngularPositionMotor(PowerMotor):
         Parameters:
             - power (float): The power to set the motor to
         '''
+        self._open_loop_request.output = power
         self._state = State.POWER
-        self._motor.set(power)
 
     def set_target_position(self, position: degrees) -> None:
         '''
@@ -153,13 +167,10 @@ class AngularPositionMotor(PowerMotor):
         Parameters:
             - angle (degrees): The angle to set the motor to
         '''
+        self._closed_loop_request.position = position * (self._gear_ratio * 360)
         self._state = State.POSITION
         
-        if position != self._target_state.position:
-            self._target_state = TrapezoidProfile.State(position, 0)
-            self._initial_state = TrapezoidProfile.State(self.get_position(), self.get_velocity())
 
-            self._trapezoid_timer.reset()
 
     @override
     def print_diagnostics(self) -> None:
