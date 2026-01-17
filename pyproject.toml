@@ -12,14 +12,14 @@ authors = [
 maintainers = [
     { name = "FRC Team 3484" },
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "wpilib",
     "robotpy",
     "robotpy-commands-v2",
     "robotpy-pathplannerlib",
     "phoenix6",
-    "photonlibpy",
+    "photonlibpy==2026.1.1rc3",
     "robotpy-apriltag",
 ]
 
