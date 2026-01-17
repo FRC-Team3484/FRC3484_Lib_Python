@@ -24,7 +24,7 @@ class LinearPositionMotor(AngularPositionMotor):
     Defines a base motor class for angular position control
 
     Parameters:
-        motor_config: SC_TemplateMotorConfig
+        motor_config: SC_MotorConfig
         current_config: SC_TemplateMotorCurrentConfig
         pid_config: SC_PIDConfig
         feed_forward_config: SC_LinearFeedForwardConfig
