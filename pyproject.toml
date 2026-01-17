@@ -6,7 +6,8 @@ readme = "README.md"
 authors = [
     { name = "thelegendofmario", email = "ethanfrancis577@gmail.com" },
     { name = "Jakob Spurgat", email = "jakob@spurgat.net" }, 
-    { name = "Ethan DeArmond", email = "eedearmond@gmail.com" }
+    { name = "Ethan DeArmond", email = "eedearmond@gmail.com" },
+    { name = "Noah Foertmeyer", email = "nofoert@gmail.com" }
 ]
 maintainers = [
     { name = "FRC Team 3484" },
