@@ -5,7 +5,8 @@ description = "FRC Team 3484's python library for frequently used code"
 readme = "README.md"
 authors = [
     { name = "thelegendofmario", email = "ethanfrancis577@gmail.com" },
-    { name = "Jakob Spurgat", email = "jakob@spurgat.net" }
+    { name = "Jakob Spurgat", email = "jakob@spurgat.net" }, 
+    { name = "Ethan DeArmond", email = "eedearmond@gmail.com" }
 ]
 maintainers = [
     { name = "FRC Team 3484" },
