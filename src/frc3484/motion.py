@@ -10,7 +10,9 @@ from .__lib.datatypes.motion_datatypes import \
     SC_DoubleSolenoidConfig, \
     SC_AngularFeedForwardConfig, \
     SC_LinearFeedForwardConfig, \
-    SC_MotorConfig
+    SC_MotorConfig, \
+    SC_PositionControl, \
+    SC_TrapezoidConfig
 
 __all__ = [
     "AngularPositionMotor",
@@ -23,5 +25,7 @@ __all__ = [
     "SC_DoubleSolenoidConfig",
     "SC_AngularFeedForwardConfig",
     "SC_LinearFeedForwardConfig",
-    "SC_MotorConfig"
+    "SC_MotorConfig",
+    "SC_PositionControl",
+    "SC_TrapezoidConfig"
 ]
