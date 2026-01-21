@@ -13,13 +13,13 @@ from phoenix6.configs import ExternalFeedbackConfigs, FeedbackConfigs, TalonFXSC
 from phoenix6.signals import ExternalFeedbackSensorSourceValue, FeedbackSensorSourceValue
 
 from .power_motor import PowerMotor
-from ..datatypes.motion_datatypes import SC_AngularFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_TrapezoidConfig
+from ..datatypes.motion_datatypes import SC_AngularFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_ExpoConfig
 
 class State(Enum):
     POWER = 0
     POSITION = 1
 
-class AngularPositionMotor(PowerMotor):
+class ExpoMotor(PowerMotor):
     '''
     Defines a base motor class for angular position control
 
@@ -41,7 +41,7 @@ class AngularPositionMotor(PowerMotor):
             motor_config: SC_MotorConfig,
             pid_config: SC_PIDConfig,
             feed_forward_config: SC_AngularFeedForwardConfig,
-            trapezoid_config: SC_TrapezoidConfig,
+            expo_config: SC_ExpoConfig,
             angle_tolerance: degrees,
             gear_ratio: float = 1.0,
             external_encoder: CANcoder | None = None
@@ -61,7 +61,8 @@ class AngularPositionMotor(PowerMotor):
         self._angle_tolerance: degrees = angle_tolerance
 
         self._open_loop_request: controls.DutyCycleOut = controls.DutyCycleOut(0.0, enable_foc=False)
-        self._closed_loop_request: controls.MotionMagicVoltage | controls.PositionVoltage = controls.PositionVoltage(0.0, 0, enable_foc=False) if trapezoid_config == SC_TrapezoidConfig() else controls.MotionMagicVoltage(0.0, slot=0, enable_foc=False)
+        self._closed_loop_request: controls.MotionMagicVoltage = controls.MotionMagicVoltage(0.0, slot=0, enable_foc=False)
+
         self._motor_config.current_limits = CurrentLimitsConfigs() \
             .with_supply_current_limit_enable(motor_config.current_limit_enabled) \
             .with_supply_current_limit(motor_config.current_limit) \
@@ -78,9 +79,14 @@ class AngularPositionMotor(PowerMotor):
             .with_k_g(feed_forward_config.G)
 
         self._motor_motion_magic = self._motor_config.motion_magic
-        self._motor_motion_magic.motion_magic_cruise_velocity = trapezoid_config.max_velocity
-        self._motor_motion_magic.motion_magic_acceleration = trapezoid_config.max_acceleration
-        self._motor_motion_magic.motion_magic_jerk = trapezoid_config.max_jerk
+        self._motor_motion_magic.motion_magic_expo_k_a = expo_config.Ka
+        self._motor_motion_magic.motion_magic_expo_k_v = expo_config.Kv
+        
+        # self._motor_motion_magic.motion_magic_cruise_velocity = trapezoid_config.max_velocity
+        # self._motor_motion_magic.motion_magic_acceleration = trapezoid_config.max_acceleration
+        # self._motor_motion_magic.motion_magic_jerk = trapezoid_config.max_jerk
+
+
 
         # Set up motor
 

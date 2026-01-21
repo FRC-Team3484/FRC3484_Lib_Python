@@ -21,7 +21,8 @@ from wpimath.units import \
 
 feet_per_second_cubed = float
 degrees_per_second_cubed = float
-
+volt_seconds_per_revolution = float
+volt_seconds_squared_per_revolution = float
 
 from wpilib import PneumaticsModuleType
 
@@ -32,9 +33,9 @@ class SC_LauncherSpeed:
 
 @dataclass(frozen=True)
 class SC_PIDConfig:
-    Kp: float
-    Ki: float
-    Kd: float
+    Kp: float = 0.0
+    Ki: float = 0.0
+    Kd: float = 0.0
     Kf: float = 0.0
 
 @dataclass(frozen=True)
@@ -42,6 +43,7 @@ class SC_SolenoidConfig:
     controller_id: int
     channel: int
     module_type: PneumaticsModuleType
+
 @dataclass(frozen=True)
 class SC_DoubleSolenoidConfig:
     controller_id: int
@@ -51,17 +53,37 @@ class SC_DoubleSolenoidConfig:
 
 @dataclass(frozen=True)
 class SC_AngularFeedForwardConfig:
-    G: volts
-    S: volts
-    V: volt_seconds_per_radian
-    A: volt_seconds_squared_per_radian
+    G: volts = 0.0
+    S: volts = 0.0
+    V: volt_seconds_per_radian = 0.0
+    A: volt_seconds_squared_per_radian = 0.0
+
+    def __eq__(self, value: object) -> bool:
+        if type(value) is SC_AngularFeedForwardConfig:
+            if (self.G == value.G) \
+            and (self.S == value.S) \
+            and (self.V == value.V) \
+            and (self.A == value.A):
+                return True
+            
+        return False
 
 @dataclass(frozen=True)
 class SC_LinearFeedForwardConfig:
-    G: volts
-    S: volts
-    V: volt_seconds_per_meter
-    A: volt_seconds_squared_per_meter
+    G: volts = 0.0 
+    S: volts = 0.0
+    V: volt_seconds_per_meter = 0.0
+    A: volt_seconds_squared_per_meter = 0.0
+
+    def __eq__(self, value: object) -> bool:
+        if type(value) is SC_LinearFeedForwardConfig:
+            if (self.G == value.G) \
+            and (self.S == value.S) \
+            and (self.V == value.V) \
+            and (self.A == value.A):
+                return True
+            
+        return False
 
 @dataclass(frozen=True)
 class SC_MotorConfig:
@@ -85,6 +107,21 @@ class SC_PositionControl:
 
 @dataclass(frozen=True)
 class SC_TrapezoidConfig:
-    max_velocity: feet_per_second | degrees_per_second
-    max_acceleration: feet_per_second_squared | degrees_per_second_squared
-    max_jerk: feet_per_second_cubed | degrees_per_second_cubed
+    max_velocity: feet_per_second | degrees_per_second = 0.0
+    max_acceleration: feet_per_second_squared | degrees_per_second_squared = 0.0
+    max_jerk: feet_per_second_cubed | degrees_per_second_cubed = 0.0
+
+    def __eq__(self, value: object) -> bool:
+        if type(value) is SC_TrapezoidConfig:
+            if (self.max_velocity == value.max_velocity) \
+            and (self.max_jerk == value.max_jerk) \
+            and (self.max_acceleration == value.max_acceleration):
+                return True
+        
+        return False
+
+
+@dataclass(frozen=True)
+class SC_ExpoConfig:
+    Kv: volt_seconds_per_revolution
+    Ka: volt_seconds_squared_per_revolution

@@ -6,7 +6,7 @@ from phoenix6.controls import Follower
 from phoenix6.signals import InvertedValue, MotorArrangementValue, NeutralModeValue
 from wpilib import SmartDashboard
 
-from ..datatypes import SC_MotorConfig
+from ..datatypes.motion_datatypes import SC_MotorConfig
 
 class PowerMotor(Subsystem):
     '''

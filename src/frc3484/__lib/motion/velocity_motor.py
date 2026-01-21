@@ -5,7 +5,7 @@ from wpilib import SmartDashboard
 from phoenix6 import controls
 from phoenix6.configs import CurrentLimitsConfigs, Slot0Configs
 
-from ..datatypes import SC_LinearFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_LauncherSpeed
+from ..datatypes.motion_datatypes import SC_LinearFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_LauncherSpeed
 from .power_motor import PowerMotor
 
 

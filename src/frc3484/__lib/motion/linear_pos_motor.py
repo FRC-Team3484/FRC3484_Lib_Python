@@ -4,7 +4,7 @@ from typing import final, override
 from math import pi
 
 from wpilib import SmartDashboard
-from wpimath.units import inches, radiansToDegrees
+from wpimath.units import inches, radiansToDegrees, inchesToMeters
 inches_per_second = float
 
 from phoenix6.hardware import CANcoder
@@ -12,7 +12,7 @@ from phoenix6.hardware import CANcoder
 # from phoenix6.configs import CurrentLimitsConfigs, Slot0Configs
 
 from .angular_pos_motor import AngularPositionMotor
-from ..datatypes.motion_datatypes import SC_LinearFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_TrapezoidConfig
+from ..datatypes.motion_datatypes import SC_LinearFeedForwardConfig, SC_AngularFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_TrapezoidConfig
 
 class State(Enum):
     POWER = 0
@@ -47,10 +47,17 @@ class LinearPositionMotor(AngularPositionMotor):
             gear_ratio: float = 1.0,
             external_encoder: CANcoder | None = None
         ) -> None:
+        angular_feed_forward_config = SC_AngularFeedForwardConfig(
+            feed_forward_config.G,
+            feed_forward_config.S,
+            feed_forward_config.V * inchesToMeters(pulley_radius)
+            feed_forward_config.A * inchesToMeters(pulley_radius)
+        )
+
         super().__init__(
             motor_config=motor_config, 
             pid_config=pid_config, 
-            feed_forward_config=feed_forward_config, 
+            feed_forward_config=angular_feed_forward_config, 
             trapezoid_config=trapezoid_config, 
             angle_tolerance=radiansToDegrees(position_tolerance/pulley_radius), 
             gear_ratio=gear_ratio, 
