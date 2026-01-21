@@ -47,10 +47,11 @@ class LinearPositionMotor(AngularPositionMotor):
             gear_ratio: float = 1.0,
             external_encoder: CANcoder | None = None
         ) -> None:
+        
         angular_feed_forward_config = SC_AngularFeedForwardConfig(
             feed_forward_config.G,
             feed_forward_config.S,
-            feed_forward_config.V * inchesToMeters(pulley_radius)
+            feed_forward_config.V * inchesToMeters(pulley_radius),
             feed_forward_config.A * inchesToMeters(pulley_radius)
         )
 
