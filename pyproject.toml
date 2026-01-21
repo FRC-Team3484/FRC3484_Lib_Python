@@ -1,10 +1,10 @@
 [project]
 name = "frc3484"
-version = "0.1.1"
+version = "0.1.2"
 description = "FRC Team 3484's python library for frequently used code"
 readme = "README.md"
 authors = [
-    { name = "thelegendofmario", email = "ethanfrancis577@gmail.com" },
+    { name = "diflouroethane", email = "ethanfrancis577@gmail.com" },
     { name = "Jakob Spurgat", email = "jakob@spurgat.net" }, 
     { name = "Ethan DeArmond", email = "eedearmond@gmail.com" },
     { name = "Noah Foertmeyer", email = "nofoert@gmail.com" }
