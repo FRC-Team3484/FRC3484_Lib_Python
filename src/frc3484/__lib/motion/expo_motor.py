@@ -61,7 +61,7 @@ class ExpoMotor(PowerMotor):
         self._angle_tolerance: degrees = angle_tolerance
 
         self._open_loop_request: controls.DutyCycleOut = controls.DutyCycleOut(0.0, enable_foc=False)
-        self._closed_loop_request: controls.MotionMagicVoltage = controls.MotionMagicVoltage(0.0, slot=0, enable_foc=False)
+        self._closed_loop_request: controls.MotionMagicExpoVoltage = controls.MotionMagicExpoVoltage(0.0, slot=0, enable_foc=False)
 
         self._motor_config.current_limits = CurrentLimitsConfigs() \
             .with_supply_current_limit_enable(motor_config.current_limit_enabled) \
