@@ -9,6 +9,7 @@ from .__lib.datatypes.motion_datatypes import \
     SC_DoubleSolenoidConfig, \
     SC_AngularFeedForwardConfig, \
     SC_LinearFeedForwardConfig, \
+    SC_TrapezoidConfig, \
     SC_MotorConfig, \
     SC_ExpoConfig
 from .__lib.datatypes.swerve_datatypes import \
@@ -32,5 +33,6 @@ __all__ = [
     "SC_CameraConfig",
     "SC_CameraResults",
     "SC_ApriltagTarget",
-    "SC_ExpoConfig"
+    "SC_ExpoConfig",
+    "SC_TrapezoidConfig"
 ]

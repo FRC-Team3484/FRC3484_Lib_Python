@@ -7,6 +7,8 @@ from wpilib import DriverStation
 
 from .controller_constants import _InputType, Input
 
+from typing import Any
+
 '''
 This module aims to solve the following problem:
 When we want to use an input such as a trigger or POV direction like a button, we have to implement logic in OI to convert the input type.
@@ -34,8 +36,8 @@ class SC_Controller(Subsystem):
     def __init__(self, port: int, axis_limit: float = 0.5, trigger_limit: float = 0.5, axis_deadband: float = 0.02) -> None:
         super().__init__()
         self._controller: GenericHID = GenericHID(port)
-        self._current_inputs: dict = self._get_all()
-        self._previous_inputs: dict = self._get_all()
+        self._current_inputs: dict[Any, Any] = self._get_all()
+        self._previous_inputs: dict[Any, Any] = self._get_all()
         self._axis_limit: float = axis_limit
         self._trigger_limit: float = trigger_limit
         self._axis_deadband: float = axis_deadband
@@ -127,7 +129,7 @@ class SC_Controller(Subsystem):
 
         return inputs
     
-    def _get_polar_axis(self, axis_x_index: int, axis_y_index: int, inputs: dict|None = None) -> Translation2d:
+    def _get_polar_axis(self, axis_x_index: int, axis_y_index: int, inputs: dict[Any, Any]|None = None) -> Translation2d:
         '''
         Get the Translation2d of a pair of axes.
         '''
@@ -138,7 +140,7 @@ class SC_Controller(Subsystem):
             self._current_inputs["axes"][axis_y_index]
         )
     
-    def get_button(self, input: Input, input_states: dict|None = None) -> bool:
+    def get_button(self, input: Input, input_states: dict[Any, Any]|None = None) -> bool:
         '''
         Get the value of an input as True/False.
         '''
@@ -184,7 +186,7 @@ class SC_Controller(Subsystem):
         '''
         return not self.get_button(input, self._current_inputs) and self.get_button(input, self._previous_inputs)
 
-    def get_axis(self, input: Input, input_states: dict|None = None) -> float:
+    def get_axis(self, input: Input, input_states: dict[Any, Any]|None = None) -> float:
         '''
         Get the value of an input on a scale of -1.0 to 1.0 (or 0.0 to 1.0 for some inputs).
         '''
@@ -244,7 +246,7 @@ class SC_Controller(Subsystem):
         '''
         return self.get_axis(input, self._current_inputs) - self.get_axis(input, self._previous_inputs)
 
-    def get_angle(self, input: Input, input_states: dict|None = None) -> float:
+    def get_angle(self, input: Input, input_states: dict[Any, Any]|None = None) -> float:
         '''
         Get the angle of an input in degrees from 0 to 360 or -1 for neutral.
         While this supports any input type, it is primarily intended for use with AXIS_ANGLE and POV_ANGLE types.
