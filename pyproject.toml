@@ -1,6 +1,6 @@
 [project]
 name = "frc3484"
-version = "0.1.4"
+version = "0.2"
 description = "FRC Team 3484's python library for frequently used code"
 readme = "README.md"
 authors = [
@@ -19,15 +19,10 @@ dependencies = [
     "robotpy-commands-v2",
     "robotpy-pathplannerlib",
     "phoenix6",
-    "photonlibpy==2026.1.1rc3",
+    "photonlibpy",
     "robotpy-apriltag",
 ]
 
 [build-system]
 requires = ["uv_build>=0.9.17,<0.10.0"]
 build-backend = "uv_build"
-
-[dependency-groups]
-dev = [
-    "pyright>=1.1.408",
-]
