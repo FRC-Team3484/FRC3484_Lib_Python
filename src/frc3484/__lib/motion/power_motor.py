@@ -5,6 +5,7 @@ from phoenix6.configs import CurrentLimitsConfigs, TalonFXConfiguration, TalonFX
 from phoenix6.controls import Follower
 from phoenix6.signals import InvertedValue, MotorArrangementValue, NeutralModeValue
 from wpilib import SmartDashboard
+from wpimath.units import volts
 
 from ..datatypes.motion_datatypes import SC_MotorConfig
 
@@ -127,3 +128,14 @@ class PowerMotor(Subsystem):
         _ = SmartDashboard.putNumber(f"Motor {self.device_id} Power (%)", self._motor.get() * 100)
         _ = SmartDashboard.putNumber(f"Motor {self.device_id} Stall Percentage", self.get_stall_percentage())
         _ = SmartDashboard.putBoolean(f"Motor {self.device_id} Stalled", self.get_stalled())
+
+    def set_voltage(self, voltage: volts) -> None:
+        '''
+        Sets the voltage of the motor
+
+        Used for SysID routines
+
+        Parameters:
+            - voltage (volts): The voltage to set the motor to
+        '''
+        self._motor.setVoltage(voltage)
