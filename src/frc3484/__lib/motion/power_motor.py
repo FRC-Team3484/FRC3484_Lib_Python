@@ -1,3 +1,4 @@
+from phoenix6.units import rotation
 from commands2 import Subsystem
 
 from phoenix6.hardware import TalonFX, TalonFXS
@@ -5,7 +6,7 @@ from phoenix6.configs import CurrentLimitsConfigs, TalonFXConfiguration, TalonFX
 from phoenix6.controls import Follower
 from phoenix6.signals import InvertedValue, MotorArrangementValue, NeutralModeValue
 from wpilib import SmartDashboard
-from wpimath.units import volts
+from wpimath.units import turns, turns_per_second, volts
 
 from ..datatypes.motion_datatypes import SC_MotorConfig
 
@@ -129,7 +130,7 @@ class PowerMotor(Subsystem):
         _ = SmartDashboard.putNumber(f"Motor {self.device_id} Stall Percentage", self.get_stall_percentage())
         _ = SmartDashboard.putBoolean(f"Motor {self.device_id} Stalled", self.get_stalled())
 
-    def set_voltage(self, voltage: volts) -> None:
+    def set_raw_voltage(self, voltage: volts) -> None:
         '''
         Sets the voltage of the motor
 
@@ -139,3 +140,36 @@ class PowerMotor(Subsystem):
             - voltage (volts): The voltage to set the motor to
         '''
         self._motor.setVoltage(voltage)
+
+    def get_raw_voltage(self) -> volts:
+        '''
+        Returns the voltage of the motor
+
+        Used for SysID routines
+
+        Returns:
+            - volts: The voltage of the motor
+        '''
+        return self._motor.get_motor_voltage().value
+
+    def get_raw_position(self) -> turns:
+        '''
+        Returns the angular position of the motor
+
+        Used for SysID routines
+
+        Returns:
+            - turns: The angular position of the motor
+        '''
+        return self._motor.get_position().value
+
+    def get_raw_velocity(self) -> turns_per_second:
+        '''
+        Returns the angular velocity of the motor
+
+        Used for SysID routines
+
+        Returns:
+            - turns_per_second: The angular velocity of the motor
+        '''
+        return self._motor.get_velocity().value
