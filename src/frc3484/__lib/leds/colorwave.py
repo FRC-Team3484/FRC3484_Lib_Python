@@ -14,6 +14,7 @@ class ColorWave :
     def _apply_to(self, data: list[AddressableLED.LEDData]):
         for i in range(len(data)):
             data[i].setLED(self._apply_brightness(self._colors[self._get_color_index(i)], self._get_brightness(i)))
+        return data
     def _get_brightness(self, offset: int):
         return (1 - math.cos(2 * math.pi / self._wavelength) * (offset - self._wave_position())) / 2
     def _apply_brightness(self, color: Color, brightness: float) -> Color:

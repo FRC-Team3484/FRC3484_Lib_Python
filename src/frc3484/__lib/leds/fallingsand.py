@@ -48,6 +48,7 @@ class FallingSand:
                         self._falling_led_position = (len(data))
                         self._leds_placed = (len(data))
                         self._state = PatternState.empty
+                return data
             case PatternState.empty:
                 self._falling_led_position += self._exit_velocity
                 self._exit_velocity += self._exit_acceleration
@@ -58,6 +59,7 @@ class FallingSand:
                         data[i].setLED(self._colors[self._get_color_index(i - int(self._falling_led_position))])
                 if(self._falling_led_position >= (len(data))):
                     self.reset()
+                return data
 
     def _get_color_index(self, offset: int) -> int:
         return (offset // self._bar_size) % len(self._colors) 

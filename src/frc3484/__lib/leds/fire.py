@@ -40,6 +40,7 @@ class Fire:
         for j in range(self._size):
             r, g, b = self._heat_color(self._heat[j])
             data[j].set_rgb(r, g, b)
+        return data
 
     def reset(self):
         for i in range(self._size):

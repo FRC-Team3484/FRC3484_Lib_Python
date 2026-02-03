@@ -41,15 +41,15 @@ class Static:
 
                         if self._leds_placed > self._center_point:
                             self._state = PatternState.empty
+                return data
 
             case PatternState.empty:
-                if self._state == PatternState.empty:
-                    for i in range(self._bar_size):
-                        data[i].setRGB(0, 0, 0)
+                for i in range(self._bar_size):
+                    data[i].setRGB(0, 0, 0)
 
-                    self._leds_placed = 0
-                    self._state = PatternState.fill
-                    return
+                self._leds_placed = 0
+                self._state = PatternState.fill
+                return data
 
     def _correct_gamma(self, color: Color) -> Color:
         return Color(color.red** self._gamma, color.green**self._gamma, color.blue**self._gamma)
