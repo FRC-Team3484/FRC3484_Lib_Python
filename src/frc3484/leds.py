@@ -11,5 +11,6 @@ __all__ = [
     "ColorWave",
     "FallingSand",
     "Fire",
+    "Static",
     "correct_gamma"
 ]
