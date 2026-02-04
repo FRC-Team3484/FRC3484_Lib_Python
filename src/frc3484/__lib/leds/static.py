@@ -8,7 +8,7 @@ class PatternState(Enum):
     empty = 1
 
 class Static:
-    def __init__(self, colors: Iterable[Color], bar_size: int, led_spacing: meters, fill_size: int, gamma: float, move_rate: int = 0.05) -> None:
+    def __init__(self, colors: Iterable[Color], bar_size: int, led_spacing: meters, fill_size: int, gamma: float) -> None:
         self._colors: list[Color] = []
         for color in colors:
             self._colors.append(self._correct_gamma(color))
@@ -16,7 +16,6 @@ class Static:
         self._led_spacing: meters = led_spacing
         self._fill_size: int = fill_size
         self._gamma: float = gamma
-        self._move_rate: int = move_rate
         self._center_point: int
         self._leds_placed: int = 0
         self._state: PatternState = PatternState.fill
