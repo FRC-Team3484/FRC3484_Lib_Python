@@ -2,7 +2,7 @@ from enum import Enum
 from typing import override
 
 from wpilib import SmartDashboard
-from wpimath.units import degrees, degrees_per_second
+from wpimath.units import degrees, degrees_per_second, turns
 # from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters
 # from wpimath.trajectory import TrapezoidProfile
 
@@ -186,3 +186,13 @@ class ExpoMotor(PowerMotor):
         _ = SmartDashboard.putNumber(f"{self._motor_name} Velocity", self.get_velocity())
         _ = SmartDashboard.putBoolean(f"{self._motor_name} At Target position", self.at_target_position())
         super().print_diagnostics()
+
+    @override
+    def set_encoder_position(self, position: turns) -> None:
+        '''
+        Sets the encoder position of the motor
+
+        Parameters:
+            - position (turns): The encoder position to set the motor to
+        '''
+        return super().set_encoder_position(position * self._gear_ratio)

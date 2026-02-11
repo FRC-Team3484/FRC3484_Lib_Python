@@ -173,3 +173,12 @@ class PowerMotor(Subsystem):
             - turns_per_second: The angular velocity of the motor
         '''
         return self._motor.get_velocity().value
+
+    def set_encoder_position(self, position: turns) -> None:
+        '''
+        Sets the encoder position of the motor
+
+        Parameters:
+            - position (turns): The encoder position to set the motor to
+        '''
+        self._motor.set_position(position)

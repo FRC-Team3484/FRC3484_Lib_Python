@@ -4,6 +4,7 @@ from wpilib import SmartDashboard
 
 from phoenix6 import controls
 from phoenix6.configs import CurrentLimitsConfigs, Slot0Configs
+from wpimath.units import turns
 
 from ..datatypes.motion_datatypes import SC_LinearFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_LauncherSpeed
 from .power_motor import PowerMotor
@@ -121,3 +122,13 @@ class VelocityMotor(PowerMotor):
         _ = SmartDashboard.putNumber(f"{self._motor_name} Speed (RPM)", self._motor.get_velocity().value * 60)
         _ = SmartDashboard.putNumber(f"{self._motor_name} At Target RPM", self.at_target_speed())
         super().print_diagnostics()
+
+    @override
+    def set_encoder_position(self, position: turns) -> None:
+        '''
+        Sets the encoder position of the motor
+
+        Parameters:
+            - position (inches): The encoder position to set the motor to
+        '''
+        return super().set_encoder_position(position * self._gear_ratio)

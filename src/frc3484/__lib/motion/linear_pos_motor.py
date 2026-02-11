@@ -116,3 +116,13 @@ class LinearPositionMotor(AngularPositionMotor):
         _ = SmartDashboard.putNumber(f"{self._motor_name} Velocity (feet/s)", self.get_velocity())
         _ = SmartDashboard.putBoolean(f"{self._motor_name} At Target Position", self.at_target_position())
         return super().print_diagnostics()
+
+    @override
+    def set_encoder_position(self, position: inches) -> None:
+        '''
+        Sets the encoder position of the motor
+
+        Parameters:
+            - position (inches): The encoder position to set the motor to
+        '''
+        return super().set_encoder_position((position / self._pulley_radius) / (2 * pi))
