@@ -6,7 +6,7 @@ from phoenix6 import controls
 from phoenix6.configs import CurrentLimitsConfigs, Slot0Configs
 from wpimath.units import turns
 
-from ..datatypes.motion_datatypes import SC_LinearFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_LauncherSpeed
+from ..datatypes.motion_datatypes import SC_AngularFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_LauncherSpeed
 from .power_motor import PowerMotor
 
 
@@ -28,7 +28,7 @@ class VelocityMotor(PowerMotor):
         self, 
         motor_config: SC_MotorConfig, 
         pid_config: SC_PIDConfig, 
-        feed_forward_config: SC_LinearFeedForwardConfig,
+        feed_forward_config: SC_AngularFeedForwardConfig,
         gear_ratio: float, 
         tolerance: float
     ) -> None:
