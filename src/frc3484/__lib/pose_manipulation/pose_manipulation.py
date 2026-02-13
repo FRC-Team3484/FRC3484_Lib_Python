@@ -3,6 +3,21 @@ from typing import Iterable
 from wpimath.geometry import Pose2d, Pose3d
 from robotpy_apriltag import AprilTagFieldLayout
 
+def get_april_tag_pose(april_tag_id: int, layout: AprilTagFieldLayout) -> Pose2d | None:
+    """
+    Returns the pose of an april tag by id
+
+    Parameters:
+        - april_tag_id (int): The id of the april tag
+        - layout (AprilTagFieldLayout): The april tag field layout
+    Returns:
+        - Pose2d | None: The pose based on the specified id, or None if the id is not found
+    """
+    pose: Pose3d | None = layout.getTagPose(april_tag_id)
+    if pose is not None:
+        return pose.toPose2d()
+    return None
+
 def get_april_tag_poses(april_tag_ids: Iterable[int], layout: AprilTagFieldLayout) -> list[Pose2d]:
     """
     Returns the poses of april tags by id
@@ -16,9 +31,9 @@ def get_april_tag_poses(april_tag_ids: Iterable[int], layout: AprilTagFieldLayou
     poses: list[Pose2d] = []
 
     for id in april_tag_ids:
-        pose: Pose3d | None = layout.getTagPose(id)
+        pose: Pose2d | None = get_april_tag_pose(id, layout)
         if pose is not None:
-            poses.append(pose.toPose2d())
+            poses.append(pose)
     
     return poses
 
