@@ -71,7 +71,7 @@ class SC_Controller(Subsystem):
         Throw an error if an issue occurs while getting an input.
         Only halt execution if not in competition.
         '''
-        print(f'Pytest loaded: {'pytest' in sys.modules}')
+        # print(f'Pytest loaded: {'pytest' in sys.modules}')
         if DriverStation.isFMSAttached() or 'pytest' in sys.modules:
             # Don't spam errors
             if self._last_error == 0:
