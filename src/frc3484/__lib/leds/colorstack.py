@@ -36,7 +36,7 @@ class ColorStack :
                     if(i >= (len(data)) - self._leds_placed):
                         data[i].setLED(self._correct_gamma(self._colors[self._get_color_index(i)]))
                     elif(i >= int(self._falling_led_position) and i < int(self._falling_led_position) + self._fill_size):
-                        data[i].setLED(self._correct_gamma(self._colors[self._get_color_index(len(data)) - self._leds_placed - self._fill_size + i - int(self._falling_led_position)]))
+                        data[i].setLED(self._correct_gamma(self._colors[self._get_color_index(len(data) - self._leds_placed - self._fill_size + i - int(self._falling_led_position))]))
                     else:
                         data[i].setLED(Color.kBlack)
                 self._falling_led_position += self._velocity
