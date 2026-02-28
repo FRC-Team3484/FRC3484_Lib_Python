@@ -11,8 +11,6 @@ class PatternState(Enum):
 class FallingSand:
     def __init__(self, colors: Iterable[Color], bar_size: int, led_spacing: meters, intake_velocity: meters_per_second, exit_acceleration: meters_per_second_squared, fill_size: int, gamma: float) -> None:
         self._colors: list[Color] = []
-        for color in colors:
-            self._colors.append(self._correct_gamma(color))
         self._bar_size: int = bar_size
         self._led_spacing: meters = led_spacing
         self._intake_velocity: meters_per_second = intake_velocity
@@ -23,6 +21,9 @@ class FallingSand:
         self._state: PatternState = PatternState.fill
         self._leds_placed: int = 0
         self._falling_led_position: float = 0.0
+        
+        for color in colors:
+            self._colors.append(self._correct_gamma(color))
         self.reset()
 
     def reset(self):
