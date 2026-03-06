@@ -11,8 +11,6 @@ class PatternState(Enum):
 class ColorStack :
     def __init__(self, colors: Iterable[Color], bar_size: int, velocity: meters_per_second, fill_size: int, empty_size: int, gamma: float) -> None:
         self._colors: list[Color] = []
-        for color in colors:
-            self._colors.append(self._correct_gamma(color))
         self._bar_size = bar_size
         self._velocity = velocity
         self._fill_size = fill_size
@@ -21,11 +19,16 @@ class ColorStack :
         self._state: PatternState = PatternState.fill
         self._leds_placed: int = 0
         self._falling_led_position: float = 0.0
+
+        for color in colors:
+            self._colors.append(self._correct_gamma(color))
         self.reset()
+
     def reset(self):
         self._leds_placed = 0
         self._falling_led_position = 0
         self._state = PatternState.fill
+        
     def _apply_to(self, data: list[AddressableLED.LEDData]):
         match self._state:
             case PatternState.fill:
@@ -33,7 +36,7 @@ class ColorStack :
                     if(i >= (len(data)) - self._leds_placed):
                         data[i].setLED(self._correct_gamma(self._colors[self._get_color_index(i)]))
                     elif(i >= int(self._falling_led_position) and i < int(self._falling_led_position) + self._fill_size):
-                        data[i].setLED(self._correct_gamma(self._colors[self._get_color_index(len(data)) - self._leds_placed - self._fill_size + i - int(self._falling_led_position)]))
+                        data[i].setLED(self._correct_gamma(self._colors[self._get_color_index(len(data) - self._leds_placed - self._fill_size + i - int(self._falling_led_position))]))
                     else:
                         data[i].setLED(Color.kBlack)
                 self._falling_led_position += self._velocity
