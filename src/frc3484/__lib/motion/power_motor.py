@@ -105,8 +105,11 @@ class PowerMotor(Subsystem):
         Returns:
             - float: The percentage of stall current being drawn by the motor
         '''
-        if abs(self._motor.get()) > self.STALL_THRESHOLD:
-            return (self._motor.get_supply_current().value / (self._motor.get_motor_stall_current().value * self._motor.get_supply_voltage().value / 12.0)) / abs(self._motor.get())
+        motor_power = self._motor.get()
+        supply_voltage = self._motor.get_supply_voltage().value
+
+        if abs(motor_power) > self.STALL_THRESHOLD and supply_voltage > 0.01:
+            return (self._motor.get_supply_current().value / (self._motor.get_motor_stall_current().value * supply_voltage / 12.0)) / abs(motor_power)
         else:
             return 0
         
