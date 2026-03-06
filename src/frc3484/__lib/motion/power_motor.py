@@ -4,7 +4,7 @@ from commands2 import Subsystem
 from phoenix6.hardware import TalonFX, TalonFXS
 from phoenix6.configs import CurrentLimitsConfigs, TalonFXConfiguration, TalonFXSConfiguration
 from phoenix6.controls import Follower
-from phoenix6.signals import InvertedValue, MotorArrangementValue, NeutralModeValue
+from phoenix6.signals import InvertedValue, MotorArrangementValue, NeutralModeValue, MotorAlignmentValue
 from wpilib import SmartDashboard
 from wpimath.units import turns, turns_per_second, volts
 
@@ -106,15 +106,15 @@ class PowerMotor(Subsystem):
             - float: The percentage of stall current being drawn by the motor
         '''
         motor_power = self._motor.get()
-        supply_voltage = self._motor.get_supply_voltage().value
+        supply_volage = self._motor.get_supply_voltage().value
 
-        if abs(motor_power) > self.STALL_THRESHOLD and supply_voltage > 0.01:
-            return (self._motor.get_supply_current().value / (self._motor.get_motor_stall_current().value * supply_voltage / 12.0)) / abs(motor_power)
+        if abs(motor_power) > self.STALL_THRESHOLD and supply_volage > 0.01:
+            return (self._motor.get_supply_current().value / (self._motor.get_motor_stall_current().value * supply_volage / 12.0)) / abs(motor_power)
         else:
             return 0
         
     def follow(self, motor: "PowerMotor") -> None:
-        Follower(motor.device_id, self._motor_inverted)
+        Follower(motor.device_id, MotorAlignmentValue(self._motor_inverted))
 
     def get_stalled(self) -> bool:
         '''
