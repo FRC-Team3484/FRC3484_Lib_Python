@@ -1,3 +1,4 @@
+from collections import defaultdict
 import sys
 
 from wpimath.geometry import Translation2d
@@ -101,9 +102,9 @@ class SC_Controller(Subsystem):
         Used for tracking when an input changes state.
         '''
         inputs: dict[str, dict[int, bool|int|float]] = {
-            "buttons": {},
-            "axes": {},
-            "povs": {}
+            "buttons": defaultdict(bool),
+            "axes": defaultdict(float),
+            "povs": defaultdict(int)
         }
 
         for i in range(1, self._controller.getButtonCount() + 1):
