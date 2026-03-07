@@ -114,7 +114,8 @@ class PowerMotor(Subsystem):
             return 0
         
     def follow(self, motor: "PowerMotor") -> None:
-        Follower(motor.device_id, MotorAlignmentValue(self._motor_inverted))
+        self._motor.set_control(Follower(motor.device_id, MotorAlignmentValue(self._motor_inverted)))
+        
 
     def get_stalled(self) -> bool:
         '''
