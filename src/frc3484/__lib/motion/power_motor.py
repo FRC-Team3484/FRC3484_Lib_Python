@@ -132,6 +132,7 @@ class PowerMotor(Subsystem):
         '''
         _ = SmartDashboard.putNumber(f"Motor {self.device_id} Power (%)", self._motor.get() * 100)
         _ = SmartDashboard.putNumber(f"Motor {self.device_id} Stall Percentage", self.get_stall_percentage())
+        _ = SmartDashboard.putNumber(f"Motor {self.device_id} Voltage (Volts)", self._motor.get_motor_voltage().value)
         _ = SmartDashboard.putBoolean(f"Motor {self.device_id} Stalled", self.get_stalled())
 
     def set_raw_voltage(self, voltage: volts) -> None:
