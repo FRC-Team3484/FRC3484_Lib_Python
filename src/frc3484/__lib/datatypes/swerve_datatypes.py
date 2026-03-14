@@ -4,6 +4,7 @@ from wpimath.units import \
     seconds, \
     inches, \
     degrees, \
+    turns, \
     volts, \
     amperes, \
     volt_seconds_per_meter, \
@@ -23,7 +24,7 @@ class SC_SwerveConfig:
     steer_can_id: int
     encoder_can_id: int
 
-    encoder_offset: degrees
+    encoder_offset: turns
     wheel_radius: inches
     drive_gear_ratio: float
     drive_scaling: float = 1.0
