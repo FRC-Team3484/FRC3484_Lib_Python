@@ -55,6 +55,8 @@ class VelocityMotor(PowerMotor):
             .with_k_a(feed_forward_config.A) \
             .with_k_s(feed_forward_config.S) \
             .with_k_g(feed_forward_config.G)
+        
+        self._motor.configurator.apply(self._motor_config)
 
     @override
     def periodic(self) -> None:
