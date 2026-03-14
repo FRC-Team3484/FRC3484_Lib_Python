@@ -166,7 +166,7 @@ class AngularPositionMotor(PowerMotor):
         Parameters:
             - angle (degrees): The angle to set the motor to
         '''
-        self._closed_loop_request.position = position * (self._gear_ratio * 360)
+        self._closed_loop_request.position = position * self._gear_ratio / 360
         self._state = State.POSITION
         
 
