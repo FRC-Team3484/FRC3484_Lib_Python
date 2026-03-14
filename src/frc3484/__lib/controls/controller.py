@@ -36,6 +36,7 @@ class SC_Controller(Subsystem):
     ERROR_TIMEOUT: int = 100 # Number of periodic cycles to wait between error messages during competition
     def __init__(self, port: int, axis_limit: float = 0.5, trigger_limit: float = 0.5, axis_deadband: float = 0.02) -> None:
         super().__init__()
+        self._port = port
         self._controller: GenericHID = GenericHID(port)
         self._current_inputs: dict[Any, Any] = self._get_all()
         self._previous_inputs: dict[Any, Any] = self._get_all()
@@ -112,21 +113,21 @@ class SC_Controller(Subsystem):
                 inputs["buttons"][i] = self._controller.getRawButton(i)
             except Exception as e:
                 inputs["buttons"][i] = False
-                self._throw_error(f"Failed to get button {i} state for controller {self._controller.getPort()}", e)
+                self._throw_error(f"Failed to get button {i} state for controller {self._port}", e)
 
         for i in range(self._controller.getAxisCount()):
             try:
                 inputs["axes"][i] = self._controller.getRawAxis(i)
             except Exception as e:
                 inputs["axes"][i] = 0.0
-                self._throw_error(f"Failed to get axis {i} state for controller {self._controller.getPort()}", e)
+                self._throw_error(f"Failed to get axis {i} state for controller {self._port}", e)
         
         for i in range(self._controller.getPOVCount()):
             try:
                 inputs["povs"][i] = self._controller.getPOV(i)
             except Exception as e:
                 inputs["povs"][i] = -1
-                self._throw_error(f"Failed to get POV {i} state for controller {self._controller.getPort()}", e)
+                self._throw_error(f"Failed to get POV {i} state for controller {self._port}", e)
 
         return inputs
     
