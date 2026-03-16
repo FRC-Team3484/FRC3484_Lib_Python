@@ -16,7 +16,7 @@ class ColorWave :
             data[i].setLED(self._apply_brightness(self._colors[self._get_color_index(i)], self._get_brightness(i)))
         return data
     def _get_brightness(self, offset: int):
-        return (1 - math.cos(2 * math.pi / self._wavelength) * (offset - self._wave_position())) / 2
+        return (1 - math.cos((2 * math.pi / self._wavelength) * (offset - self._wave_position()))) / 2
     def _apply_brightness(self, color: Color, brightness: float) -> Color:
         return Color(self._gamma_correction(color.red * brightness), self._gamma_correction(color.green * brightness), self._gamma_correction(color.blue * brightness) )
     def _get_color_index(self, offset: int) -> int:
