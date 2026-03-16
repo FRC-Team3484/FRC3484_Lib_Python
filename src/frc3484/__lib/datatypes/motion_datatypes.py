@@ -17,7 +17,7 @@ from wpimath.units import \
     feet_per_second, \
     feet_per_second_squared, \
     degrees_per_second, \
-    degrees_per_second_squared
+    degrees_per_second_squared \
 
 feet_per_second_cubed = float
 degrees_per_second_cubed = float
@@ -125,3 +125,4 @@ class SC_TrapezoidConfig:
 class SC_ExpoConfig:
     Kv: volt_seconds_per_revolution
     Ka: volt_seconds_squared_per_revolution
+    max_velocity: revolutions_per_minute

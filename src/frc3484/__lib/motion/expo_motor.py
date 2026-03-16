@@ -51,8 +51,6 @@ class ExpoMotor(PowerMotor):
         # Set up variables
         self._state: State = State.POWER
 
-
-
         self._motor_name: str = str(self._motor.device_id)
 
         self._encoder: CANcoder | None = external_encoder
@@ -81,12 +79,7 @@ class ExpoMotor(PowerMotor):
         self._motor_motion_magic = self._motor_config.motion_magic
         self._motor_motion_magic.motion_magic_expo_k_a = expo_config.Ka
         self._motor_motion_magic.motion_magic_expo_k_v = expo_config.Kv
-        
-        # self._motor_motion_magic.motion_magic_cruise_velocity = trapezoid_config.max_velocity
-        # self._motor_motion_magic.motion_magic_acceleration = trapezoid_config.max_acceleration
-        # self._motor_motion_magic.motion_magic_jerk = trapezoid_config.max_jerk
-
-
+        self._motor_motion_magic.motion_magic_cruise_velocity = expo_config.max_velocity
 
         # Set up motor
 
