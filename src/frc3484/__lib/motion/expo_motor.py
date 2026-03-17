@@ -128,7 +128,7 @@ class ExpoMotor(PowerMotor):
         Returns:
             - bool: True if the motor is at the target angle, False otherwise
         '''
-        return abs(self._closed_loop_request.position - self._motor.get_position().value) < self._angle_tolerance
+        return abs(self._closed_loop_request.position - self._motor.get_position().value) * 360.0 < self._angle_tolerance
 
     def get_position(self) -> degrees:
         '''
