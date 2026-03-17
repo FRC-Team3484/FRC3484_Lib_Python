@@ -3,12 +3,13 @@ from dataclasses import dataclass
 from wpimath.units import \
     seconds, \
     inches, \
-    degrees, \
     turns, \
     volts, \
     amperes, \
     volt_seconds_per_meter, \
-    volt_seconds_squared_per_meter
+    volt_seconds_squared_per_meter, \
+    turns_per_second, \
+    turns_per_second_squared
 
 
 volt_seconds_per_rotation = float
@@ -60,6 +61,8 @@ class SC_SteerPIDConfig:
     Kp: float
     Ki: float
     Kd: float
-    V: volt_seconds_per_rotation
-    A: volt_seconds_squared_per_rotation
-    S: volts
+    V: volt_seconds_per_rotation = 0.0
+    A: volt_seconds_squared_per_rotation = 0.0
+    S: volts = 0.0
+    max_velocity: turns_per_second = 0.0
+    max_acceleration: turns_per_second_squared = 0.0

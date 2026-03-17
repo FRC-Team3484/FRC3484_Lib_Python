@@ -221,7 +221,7 @@ wheels = [
 
 [[package]]
 name = "frc3484"
-version = "0.2.20"
+version = "0.2.25"
 source = { editable = "." }
 dependencies = [
     { name = "phoenix6" },
