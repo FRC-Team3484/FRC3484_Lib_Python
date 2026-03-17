@@ -137,7 +137,7 @@ class ExpoMotor(PowerMotor):
         Returns:
             - degrees: The current angle of the motor
         '''
-        return (self._motor.get_position().value / self._gear_ratio) * 360
+        return (self._motor.get_position().value / self._gear_ratio) * 360.0
 
     def get_velocity(self) -> degrees_per_second:
         '''
@@ -146,7 +146,7 @@ class ExpoMotor(PowerMotor):
         Returns:
             - degrees_per_second: The current velocity of the motor
         '''
-        return (self._motor.get_velocity().value / self._gear_ratio) * 360
+        return (self._motor.get_velocity().value / self._gear_ratio) * 360.0
 
     def set_power(self, power: float) -> None:
         '''
@@ -165,7 +165,7 @@ class ExpoMotor(PowerMotor):
         Parameters:
             - angle (degrees): The angle to set the motor to
         '''
-        self._closed_loop_request.position = position * (self._gear_ratio * 360)
+        self._closed_loop_request.position = position * (self._gear_ratio / 360.0)
         self._state = State.POSITION
         
 
