@@ -8,8 +8,8 @@ from wpimath.units import \
     amperes, \
     volt_seconds_per_meter, \
     volt_seconds_squared_per_meter, \
-    turns_per_second, \
-    turns_per_second_squared
+    radians_per_second, \
+    radians_per_second_squared
 
 
 volt_seconds_per_rotation = float
@@ -64,5 +64,5 @@ class SC_SteerPIDConfig:
     V: volt_seconds_per_rotation = 0.0
     A: volt_seconds_squared_per_rotation = 0.0
     S: volts = 0.0
-    max_velocity: turns_per_second = 0.0
-    max_acceleration: turns_per_second_squared = 0.0
+    max_velocity: radians_per_second = 0.0
+    max_acceleration: radians_per_second_squared = 0.0
