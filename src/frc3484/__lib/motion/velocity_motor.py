@@ -5,6 +5,7 @@ from wpilib import SmartDashboard
 from phoenix6 import controls
 from phoenix6.configs import CurrentLimitsConfigs, Slot0Configs
 from wpimath.units import turns
+from wpiutil.log import DataLog, BooleanLogEntry, DoubleLogEntry
 
 from ..datatypes.motion_datatypes import SC_AngularFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_LauncherSpeed
 from .power_motor import PowerMotor
@@ -36,7 +37,7 @@ class VelocityMotor(PowerMotor):
 
         self._tolerance: float = tolerance
         self._gear_ratio: float = gear_ratio
-        self._motor_name: str = str(self._motor.device_id)
+        self._motor_name: str | None = motor_config.motor_name
 
         self._open_loop_request: controls.DutyCycleOut = controls.DutyCycleOut(0.0, enable_foc=False)
         self._closed_loop_request: controls.VelocityVoltage = controls.VelocityVoltage(0.0, slot=0, enable_foc=False)
@@ -126,11 +127,11 @@ class VelocityMotor(PowerMotor):
         super().print_diagnostics()
 
     @override
-    def set_encoder_position(self, position: turns) -> None:
-        '''
-        Sets the encoder position of the motor
+    def log_diagnostics(self, log: DataLog) -> None:
+        speed_log = DoubleLogEntry(log, f"{self._motor_name} speed (rpm)")
+        at_target_rpm_log = BooleanLogEntry(log, f"{self._motor_name} at target RPM")
 
-        Parameters:
-            - position (inches): The encoder position to set the motor to
-        '''
-        return super().set_encoder_position(position * self._gear_ratio)
+        speed_log.append(self._motor.get_velocity().value * 60)
+        at_target_rpm_log.append(self.at_target_speed())
+
+        return super().log_diagnostics(log)

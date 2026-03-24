@@ -11,6 +11,7 @@ from phoenix6 import controls
 from phoenix6.hardware import CANcoder
 from phoenix6.configs import ExternalFeedbackConfigs, FeedbackConfigs, TalonFXSConfiguration, TalonFXConfiguration, CurrentLimitsConfigs, Slot0Configs
 from phoenix6.signals import ExternalFeedbackSensorSourceValue, FeedbackSensorSourceValue
+from wpiutil.log import DataLog, BooleanLogEntry, DoubleLogEntry
 
 from .power_motor import PowerMotor
 from ..datatypes.motion_datatypes import SC_AngularFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_TrapezoidConfig
@@ -53,7 +54,7 @@ class AngularPositionMotor(PowerMotor):
 
 
 
-        self._motor_name: str = str(self._motor.device_id)
+        self._motor_name: str|None = motor_config.motor_name
 
         self._encoder: CANcoder | None = external_encoder
 
@@ -92,7 +93,8 @@ class AngularPositionMotor(PowerMotor):
                     .with_rotor_to_sensor_ratio(gear_ratio) \
                     .with_feedback_remote_sensor_id(self._encoder.device_id) \
                     .with_external_feedback_sensor_source(ExternalFeedbackSensorSourceValue.REMOTE_CANCODER)
-            
+            else:
+                self._motor_config.external_feedback.sensor_to_mechanism_ratio = gear_ratio
 
         elif type(self._motor_config) is TalonFXConfiguration:
             if self._encoder is not None:
@@ -180,6 +182,18 @@ class AngularPositionMotor(PowerMotor):
         _ = SmartDashboard.putNumber(f"{self._motor_name} Velocity", self.get_velocity())
         _ = SmartDashboard.putBoolean(f"{self._motor_name} At Target position", self.at_target_position())
         super().print_diagnostics()
+
+    @override
+    def log_diagnostics(self, log: DataLog) -> None:
+        position_log = DoubleLogEntry(log, f"{self._motor_name} position (degrees)")
+        velocity_log = DoubleLogEntry(log, f"{self._motor_name} velocity")
+        at_target_log = DoubleLogEntry(log, f"{self._motor_name} at target")
+        
+        position_log.append(self.get_position())
+        velocity_log.append(self.get_velocity())
+        at_target_log.append(self.at_target_position())
+
+        return super().log_diagnostics(log)
 
     def set_mechanism_position(self, position: degrees) -> None:
         '''

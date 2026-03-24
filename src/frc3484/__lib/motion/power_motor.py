@@ -5,7 +5,8 @@ from phoenix6.hardware import TalonFX, TalonFXS
 from phoenix6.configs import CurrentLimitsConfigs, TalonFXConfiguration, TalonFXSConfiguration
 from phoenix6.controls import Follower
 from phoenix6.signals import InvertedValue, MotorArrangementValue, NeutralModeValue, MotorAlignmentValue
-from wpilib import SmartDashboard
+from wpilib import SmartDashboard, DataLogManager
+from wpiutil.log import DataLog, DoubleLogEntry, BooleanLogEntry
 from wpimath.units import turns, turns_per_second, volts
 
 from ..datatypes.motion_datatypes import SC_MotorConfig
@@ -61,7 +62,7 @@ class PowerMotor(Subsystem):
 
         _ = self._motor.configurator.apply(self._motor_config)
 
-        _ = SmartDashboard.putBoolean(f"{self._name} Diagnostics", False)
+        # _ = SmartDashboard.putBoolean(f"{self._name} Diagnostics", False)
         self._motor_inverted = motor_config.inverted
 
     @property
@@ -72,8 +73,10 @@ class PowerMotor(Subsystem):
         '''
         Handles printing diagnostic information to Smart Dashboard
         '''
-        if SmartDashboard.getBoolean(f"{self._name} Diagnostics", False):
-            self.print_diagnostics()
+        # if SmartDashboard.getBoolean(f"{self._name} Diagnostics", False):
+        #     self.print_diagnostics()
+        #     self.log_diagnostics()
+        pass
 
     def set_power(self, power: float) -> None:
         '''
@@ -134,6 +137,16 @@ class PowerMotor(Subsystem):
         _ = SmartDashboard.putNumber(f"Motor {self._name} Stall Percentage", self.get_stall_percentage())
         _ = SmartDashboard.putNumber(f"Motor {self._name} Voltage (Volts)", self._motor.get_motor_voltage().value)
         _ = SmartDashboard.putBoolean(f"Motor {self._name} Stalled", self.get_stalled())
+
+    def log_diagnostics(self, log: DataLog) -> None:
+        stalled_log = BooleanLogEntry(log, f"Motor {self._name} Stalled")
+        stalled_log.append(self.get_stalled())
+        power_percent_log = DoubleLogEntry(log, f"Motor {self._name} Power (%)")
+        power_percent_log.append(self._motor.get()*100)
+        stall_percent_log = DoubleLogEntry(log, f"Motor {self._name} Stall Percentage")
+        stall_percent_log.append(self.get_stall_percentage())
+        voltage_log = DoubleLogEntry(log, f"Motor {self._name} Voltage (Volts)")
+        voltage_log.append(self._motor.get_motor_voltage().value)
 
     def set_raw_voltage(self, voltage: volts) -> None:
         '''

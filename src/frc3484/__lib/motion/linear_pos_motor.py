@@ -5,6 +5,7 @@ from math import pi
 
 from wpilib import SmartDashboard
 from wpimath.units import inches, radiansToDegrees, inchesToMeters
+from wpiutil.log import DataLog, BooleanLogEntry, DoubleLogEntry
 inches_per_second = float
 
 from phoenix6.hardware import CANcoder
@@ -116,6 +117,18 @@ class LinearPositionMotor(AngularPositionMotor):
         _ = SmartDashboard.putNumber(f"{self._motor_name} Velocity (feet/s)", self.get_velocity())
         _ = SmartDashboard.putBoolean(f"{self._motor_name} At Target Position", self.at_target_position())
         return super().print_diagnostics()
+
+    @override
+    def log_diagnostics(self, log: DataLog) -> None:
+        position_log = DoubleLogEntry(log, f"{self._motor_name} position (feet)")
+        velocity_log = DoubleLogEntry(log, f"{self._motor_name} velocity (feet/s)")
+        at_target_position_log = DoubleLogEntry(log, f"{self._motor_name} at target position")
+        
+        position_log.append(self.get_position())
+        velocity_log.append(self.get_velocity())
+        at_target_position_log.append(self.at_target_position())
+        
+        return super().log_diagnostics(log)
 
     @override
     def set_encoder_position(self, position: inches) -> None:
