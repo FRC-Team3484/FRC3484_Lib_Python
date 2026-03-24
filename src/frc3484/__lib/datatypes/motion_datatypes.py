@@ -27,7 +27,7 @@ volt_seconds_squared_per_revolution = float
 from wpilib import PneumaticsModuleType
 
 @dataclass(frozen=True)
-class SC_LauncherSpeed:
+class SC_SpeedRequest:
     speed: revolutions_per_minute
     power: float
 
@@ -90,6 +90,7 @@ class SC_MotorConfig:
     can_id: int
     inverted: bool = False
     can_bus_name: str = "rio"
+    motor_name: str | None = None
 
     neutral_mode: NeutralModeValue = NeutralModeValue.BRAKE
 
@@ -99,6 +100,7 @@ class SC_MotorConfig:
     current_threshold: amperes = 50
     current_time: seconds = 0.1
     current_limit: amperes = 20
+
 
 @dataclass(frozen=True)
 class SC_PositionControl:

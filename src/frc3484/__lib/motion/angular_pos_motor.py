@@ -57,7 +57,6 @@ class AngularPositionMotor(PowerMotor):
 
         self._encoder: CANcoder | None = external_encoder
 
-        self._gear_ratio: float = gear_ratio
         self._angle_tolerance: degrees = angle_tolerance
 
         self._open_loop_request: controls.DutyCycleOut = controls.DutyCycleOut(0.0, enable_foc=False)
@@ -89,19 +88,20 @@ class AngularPositionMotor(PowerMotor):
         # The portion for the external encoder is here, but the rest of the configuration is in the PowerMotor class
         if type(self._motor_config) is TalonFXSConfiguration:
             if self._encoder is not None:
-                self._gear_ratio = 1.0
                 self._motor_config.external_feedback = ExternalFeedbackConfigs() \
                     .with_rotor_to_sensor_ratio(gear_ratio) \
                     .with_feedback_remote_sensor_id(self._encoder.device_id) \
                     .with_external_feedback_sensor_source(ExternalFeedbackSensorSourceValue.REMOTE_CANCODER)
+            
 
         elif type(self._motor_config) is TalonFXConfiguration:
             if self._encoder is not None:
-                self._gear_ratio = 1.0
                 self._motor_config.feedback = FeedbackConfigs() \
                     .with_rotor_to_sensor_ratio(gear_ratio) \
                     .with_feedback_remote_sensor_id(self._encoder.device_id) \
                     .with_feedback_sensor_source(FeedbackSensorSourceValue.REMOTE_CANCODER)
+            else:
+                self._motor_config.feedback.sensor_to_mechanism_ratio = gear_ratio
         else:
             raise ValueError(f"Invalid motor type: {motor_config.motor_type}")
 
@@ -159,14 +159,14 @@ class AngularPositionMotor(PowerMotor):
         self._open_loop_request.output = power
         self._state = State.POWER
 
-    def set_target_position(self, position: degrees) -> None:
+    def set_target_mechanism_position(self, position: degrees) -> None:
         '''
         Sets the target angle of the motor
 
         Parameters:
             - angle (degrees): The angle to set the motor to
         '''
-        self._closed_loop_request.position = position * self._gear_ratio / 360
+        self._closed_loop_request.position = position  / 360
         self._state = State.POSITION
         
 
@@ -181,12 +181,11 @@ class AngularPositionMotor(PowerMotor):
         _ = SmartDashboard.putBoolean(f"{self._motor_name} At Target position", self.at_target_position())
         super().print_diagnostics()
 
-    @override
-    def set_encoder_position(self, position: turns) -> None:
+    def set_mechanism_position(self, position: degrees) -> None:
         '''
         Sets the encoder position of the motor
 
         Parameters:
             - position (turns): The encoder position to set the motor to
         '''
-        return super().set_encoder_position(position * self._gear_ratio)
+        self._motor.set_position(position/360)

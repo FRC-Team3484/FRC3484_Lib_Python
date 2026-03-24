@@ -30,7 +30,7 @@ class PowerMotor(Subsystem):
         
         self._motor: TalonFX | TalonFXS
         self._motor_config: TalonFXConfiguration | TalonFXSConfiguration
-
+        self._name = motor_config.motor_name if motor_config.motor_name else motor_config.can_id
         
 
         # If the motor_type is minion, it needs a talon FXS controller to be able to set the correct commutation
@@ -61,7 +61,7 @@ class PowerMotor(Subsystem):
 
         _ = self._motor.configurator.apply(self._motor_config)
 
-        _ = SmartDashboard.putBoolean(f"{self._motor.device_id} Diagnostics", False)
+        _ = SmartDashboard.putBoolean(f"{self._name} Diagnostics", False)
         self._motor_inverted = motor_config.inverted
 
     @property
@@ -72,7 +72,7 @@ class PowerMotor(Subsystem):
         '''
         Handles printing diagnostic information to Smart Dashboard
         '''
-        if SmartDashboard.getBoolean(f"{self._motor.device_id} Diagnostics", False):
+        if SmartDashboard.getBoolean(f"{self._name} Diagnostics", False):
             self.print_diagnostics()
 
     def set_power(self, power: float) -> None:
@@ -130,10 +130,10 @@ class PowerMotor(Subsystem):
         '''
         Prints diagnostic information to Smart Dashboard
         '''
-        _ = SmartDashboard.putNumber(f"Motor {self.device_id} Power (%)", self._motor.get() * 100)
-        _ = SmartDashboard.putNumber(f"Motor {self.device_id} Stall Percentage", self.get_stall_percentage())
-        _ = SmartDashboard.putNumber(f"Motor {self.device_id} Voltage (Volts)", self._motor.get_motor_voltage().value)
-        _ = SmartDashboard.putBoolean(f"Motor {self.device_id} Stalled", self.get_stalled())
+        _ = SmartDashboard.putNumber(f"Motor {self._name} Power (%)", self._motor.get() * 100)
+        _ = SmartDashboard.putNumber(f"Motor {self._name} Stall Percentage", self.get_stall_percentage())
+        _ = SmartDashboard.putNumber(f"Motor {self._name} Voltage (Volts)", self._motor.get_motor_voltage().value)
+        _ = SmartDashboard.putBoolean(f"Motor {self._name} Stalled", self.get_stalled())
 
     def set_raw_voltage(self, voltage: volts) -> None:
         '''
@@ -178,12 +178,3 @@ class PowerMotor(Subsystem):
             - turns_per_second: The angular velocity of the motor
         '''
         return self._motor.get_velocity().value
-
-    def set_encoder_position(self, position: turns) -> None:
-        '''
-        Sets the encoder position of the motor
-
-        Parameters:
-            - position (turns): The encoder position to set the motor to
-        '''
-        self._motor.set_position(position)
