@@ -121,7 +121,7 @@ class ExpoMotor(PowerMotor):
         if SmartDashboard.getBoolean(f"{self._motor_name} Diagnostics", defaultValue=False):
             self.print_diagnostics()
 
-    def at_target_position(self) -> bool:
+    def at_target_mechanism_position(self) -> bool:
         '''
         Returns whether the motor is at the target angle or not
 
@@ -130,7 +130,7 @@ class ExpoMotor(PowerMotor):
         '''
         return abs(self._closed_loop_request.position - self._motor.get_position().value) * 360.0 < self._angle_tolerance
 
-    def get_position(self) -> degrees:
+    def get_mechanism_position(self) -> degrees:
         '''
         Returns the current angle of the motor
 
@@ -158,7 +158,7 @@ class ExpoMotor(PowerMotor):
         self._open_loop_request.output = power
         self._state = State.POWER
 
-    def set_target_position(self, position: degrees) -> None:
+    def set_mechanism_target_position(self, position: degrees) -> None:
         '''
         Sets the target angle of the motor
 
@@ -180,12 +180,11 @@ class ExpoMotor(PowerMotor):
         _ = SmartDashboard.putBoolean(f"{self._motor_name} At Target position", self.at_target_position())
         super().print_diagnostics()
 
-    @override
-    def set_encoder_position(self, position: turns) -> None:
+    def set_mechanism_position(self, position: turns) -> None:
         '''
         Sets the encoder position of the motor
 
         Parameters:
             - position (turns): The encoder position to set the motor to
         '''
-        return super().set_encoder_position(position * self._gear_ratio)
+        self._motor.set_position(position)

@@ -13,7 +13,7 @@ from phoenix6.hardware import CANcoder
 # from phoenix6.configs import CurrentLimitsConfigs, Slot0Configs
 
 from .angular_pos_motor import AngularPositionMotor
-from ..datatypes.motion_datatypes import SC_LinearFeedForwardConfig, SC_AngularFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_TrapezoidConfig
+from ..datatypes.motion_datatypes import SC_LinearFeedForwardConfig, SC_AngularFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_LinearTrapezoidConfig
 
 class State(Enum):
     POWER = 0
@@ -42,7 +42,7 @@ class LinearPositionMotor(AngularPositionMotor):
             motor_config: SC_MotorConfig,
             pid_config: SC_PIDConfig,
             feed_forward_config: SC_LinearFeedForwardConfig,
-            trapezoid_config: SC_TrapezoidConfig,
+            trapezoid_config: SC_LinearTrapezoidConfig,
             position_tolerance: inches,
             pulley_radius: inches,
             gear_ratio: float = 1.0,

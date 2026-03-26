@@ -7,7 +7,7 @@ from phoenix6.configs import CurrentLimitsConfigs, Slot0Configs
 from wpimath.units import turns
 from wpiutil.log import DataLog, BooleanLogEntry, DoubleLogEntry
 
-from ..datatypes.motion_datatypes import SC_AngularFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_LauncherSpeed
+from ..datatypes.motion_datatypes import SC_AngularFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_SpeedRequest
 from .power_motor import PowerMotor
 
 
@@ -77,7 +77,7 @@ class VelocityMotor(PowerMotor):
         if SmartDashboard.getBoolean(f"{self._motor_name} Diagnostics", False):
             self.print_diagnostics()
     
-    def set_speed(self, speed: SC_LauncherSpeed) -> None:
+    def set_mechanism_speed(self, speed: SC_SpeedRequest) -> None:
         '''
         Sets the target speed for the motor
 
@@ -88,7 +88,7 @@ class VelocityMotor(PowerMotor):
         self._closed_loop_request.velocity = (speed.speed * self._gear_ratio) / 60
         
 
-    def at_target_speed(self) -> bool:
+    def mechanism_at_target_speed(self) -> bool:
         '''
         Checks if the motor is at the target speed
 

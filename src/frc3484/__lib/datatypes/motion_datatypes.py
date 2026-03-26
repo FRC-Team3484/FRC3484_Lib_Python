@@ -108,13 +108,13 @@ class SC_PositionControl:
     position: inches
 
 @dataclass(frozen=True)
-class SC_TrapezoidConfig:
+class SC_LinearTrapezoidConfig:
     max_velocity: feet_per_second | degrees_per_second = 0.0
     max_acceleration: feet_per_second_squared | degrees_per_second_squared = 0.0
     max_jerk: feet_per_second_cubed | degrees_per_second_cubed = 0.0
 
     def __eq__(self, value: object) -> bool:
-        if type(value) is SC_TrapezoidConfig:
+        if type(value) is SC_LinearTrapezoidConfig:
             if (self.max_velocity == value.max_velocity) \
             and (self.max_jerk == value.max_jerk) \
             and (self.max_acceleration == value.max_acceleration):
@@ -122,6 +122,20 @@ class SC_TrapezoidConfig:
         
         return False
 
+@dataclass(frozen=True)
+class SC_AngularTrapezoidConfig:
+    max_velocity: feet_per_second | degrees_per_second = 0.0
+    max_acceleration: feet_per_second_squared | degrees_per_second_squared = 0.0
+    max_jerk: feet_per_second_cubed | degrees_per_second_cubed = 0.0
+
+    def __eq__(self, value: object) -> bool:
+        if type(value) is SC_AngularTrapezoidConfig:
+            if (self.max_velocity == value.max_velocity) \
+            and (self.max_jerk == value.max_jerk) \
+            and (self.max_acceleration == value.max_acceleration):
+                return True
+        
+        return False
 
 @dataclass(frozen=True)
 class SC_ExpoConfig:

@@ -14,7 +14,7 @@ from phoenix6.signals import ExternalFeedbackSensorSourceValue, FeedbackSensorSo
 from wpiutil.log import DataLog, BooleanLogEntry, DoubleLogEntry
 
 from .power_motor import PowerMotor
-from ..datatypes.motion_datatypes import SC_AngularFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_TrapezoidConfig
+from ..datatypes.motion_datatypes import SC_AngularFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_AngularTrapezoidConfig
 
 class State(Enum):
     POWER = 0
@@ -42,7 +42,7 @@ class AngularPositionMotor(PowerMotor):
             motor_config: SC_MotorConfig,
             pid_config: SC_PIDConfig,
             feed_forward_config: SC_AngularFeedForwardConfig,
-            trapezoid_config: SC_TrapezoidConfig,
+            trapezoid_config: SC_AngularTrapezoidConfig,
             angle_tolerance: degrees,
             gear_ratio: float = 1.0,
             external_encoder: CANcoder | None = None
