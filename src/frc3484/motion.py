@@ -5,7 +5,7 @@ from .__lib.motion.velocity_motor import VelocityMotor
 from .__lib.motion.expo_motor import ExpoMotor
 
 from .__lib.datatypes.motion_datatypes import \
-    SC_LauncherSpeed, \
+    SC_SpeedRequest, \
     SC_PIDConfig, \
     SC_SolenoidConfig, \
     SC_DoubleSolenoidConfig, \
@@ -13,7 +13,8 @@ from .__lib.datatypes.motion_datatypes import \
     SC_LinearFeedForwardConfig, \
     SC_MotorConfig, \
     SC_PositionControl, \
-    SC_TrapezoidConfig, \
+    SC_LinearTrapezoidConfig, \
+    SC_AngularTrapezoidConfig, \
     SC_ExpoConfig
 
 __all__ = [
@@ -22,7 +23,7 @@ __all__ = [
     "PowerMotor",
     "VelocityMotor",
     "ExpoMotor",
-    "SC_LauncherSpeed",
+    "SC_SpeedRequest",
     "SC_PIDConfig",
     "SC_SolenoidConfig",
     "SC_DoubleSolenoidConfig",
@@ -30,6 +31,7 @@ __all__ = [
     "SC_LinearFeedForwardConfig",
     "SC_MotorConfig",
     "SC_PositionControl",
-    "SC_TrapezoidConfig",
+    "SC_LinearTrapezoidConfig",
+    "SC_AngularTrapezoidConfig",
     "SC_ExpoConfig"
 ]
