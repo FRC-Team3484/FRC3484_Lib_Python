@@ -3,13 +3,14 @@ from .__lib.datatypes.pathing_datatypes import \
     SC_CameraResults, \
     SC_ApriltagTarget
 from .__lib.datatypes.motion_datatypes import \
-    SC_LauncherSpeed, \
+    SC_SpeedRequest, \
     SC_PIDConfig, \
     SC_SolenoidConfig, \
     SC_DoubleSolenoidConfig, \
     SC_AngularFeedForwardConfig, \
     SC_LinearFeedForwardConfig, \
-    SC_TrapezoidConfig, \
+    SC_AngularTrapezoidConfig, \
+    SC_LinearTrapezoidConfig, \
     SC_MotorConfig, \
     SC_ExpoConfig
 from .__lib.datatypes.swerve_datatypes import \
@@ -19,7 +20,7 @@ from .__lib.datatypes.swerve_datatypes import \
     SC_SteerPIDConfig
 
 __all__ = [
-    "SC_LauncherSpeed",
+    "SC_SpeedRequest",
     "SC_PIDConfig",
     "SC_SolenoidConfig",
     "SC_DoubleSolenoidConfig",
@@ -34,5 +35,6 @@ __all__ = [
     "SC_CameraResults",
     "SC_ApriltagTarget",
     "SC_ExpoConfig",
-    "SC_TrapezoidConfig"
+    "SC_AngularTrapezoidConfig",
+    "SC_LinearTrapezoidConfig"
 ]
