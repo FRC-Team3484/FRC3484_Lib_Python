@@ -1,13 +1,13 @@
-from phoenix6.units import rotation
 from commands2 import Subsystem
+
+from wpilib import DataLogManager, SmartDashboard
+from wpiutil.log import DoubleLogEntry, BooleanLogEntry
+from wpimath.units import turns, turns_per_second, volts
 
 from phoenix6.hardware import TalonFX, TalonFXS
 from phoenix6.configs import CurrentLimitsConfigs, TalonFXConfiguration, TalonFXSConfiguration
 from phoenix6.controls import Follower
 from phoenix6.signals import InvertedValue, MotorArrangementValue, NeutralModeValue, MotorAlignmentValue
-from wpilib import SmartDashboard, DataLogManager
-from wpiutil.log import DataLog, DoubleLogEntry, BooleanLogEntry
-from wpimath.units import turns, turns_per_second, volts
 
 from ..datatypes.motion_datatypes import SC_MotorConfig
 
@@ -19,15 +19,16 @@ class PowerMotor(Subsystem):
     Parameters:
         - motor_config (SC_MotorConfig): The configuration for the motor
         - current_config (SC_TemplateMotorCurrentConfig): Current limit settings for the motor
+        - logging_enabled (bool): Whether logging is enabled for this motor
     '''
     STALL_LIMIT: float = 0.75
     STALL_THRESHOLD: float = 0.1
 
     def __init__(
             self, 
-            motor_config: SC_MotorConfig
+            motor_config: SC_MotorConfig,
+            logging_enabled: bool
         ) -> None:
-        super().__init__()
         
         self._motor: TalonFX | TalonFXS
         self._motor_config: TalonFXConfiguration | TalonFXSConfiguration
@@ -60,22 +61,23 @@ class PowerMotor(Subsystem):
             .with_supply_current_lower_limit(motor_config.current_threshold) \
             .with_supply_current_lower_time(motor_config.current_time)
 
-        _ = self._motor.configurator.apply(self._motor_config)
+        self._motor.configurator.apply(self._motor_config)  # type: ignore
 
-        # _ = SmartDashboard.putBoolean(f"{self._name} Diagnostics", False)
         self._motor_inverted = motor_config.inverted
+
+        self._logging_enabled = logging_enabled
+        if self._logging_enabled:
+            log = DataLogManager.getLog()
+            self._stalled_log = BooleanLogEntry(log, f"/motors/{self._name}/stalled")
+            self._power_percent_log = DoubleLogEntry(log, f"/motors/{self._name}/power_percent")
+            self._stall_percent_log = DoubleLogEntry(log, f"/motors/{self._name}/stall_percent")
+            self._voltage_log = DoubleLogEntry(log, f"/motors/{self._name}/voltage")
 
     @property
     def device_id(self) -> int:
         return self._motor.device_id
 
     def periodic(self) -> None:
-        '''
-        Handles printing diagnostic information to Smart Dashboard
-        '''
-        # if SmartDashboard.getBoolean(f"{self._name} Diagnostics", False):
-        #     self.print_diagnostics()
-        #     self.log_diagnostics()
         pass
 
     def set_power(self, power: float) -> None:
@@ -91,15 +93,21 @@ class PowerMotor(Subsystem):
         '''
         Sets the motor to brake mode
         '''
+        if self._motor_config.motor_output.neutral_mode == NeutralModeValue.BRAKE:
+            return
+
         self._motor_config.motor_output.neutral_mode = NeutralModeValue.BRAKE
-        _ = self._motor.configurator.apply(self._motor_config)
+        self._motor.configurator.apply(self._motor_config) # type: ignore
 
     def set_coast_mode(self) -> None:
         '''
         Sets the motor to coast mode
         '''
+        if self._motor_config.motor_output.neutral_mode == NeutralModeValue.COAST:
+            return
+
         self._motor_config.motor_output.neutral_mode = NeutralModeValue.COAST
-        _ = self._motor.configurator.apply(self._motor_config)
+        self._motor.configurator.apply(self._motor_config) # type: ignore
 
     def get_stall_percentage(self) -> float:
         '''
@@ -133,20 +141,19 @@ class PowerMotor(Subsystem):
         '''
         Prints diagnostic information to Smart Dashboard
         '''
-        _ = SmartDashboard.putNumber(f"Motor {self._name} Power (%)", self._motor.get() * 100)
-        _ = SmartDashboard.putNumber(f"Motor {self._name} Stall Percentage", self.get_stall_percentage())
-        _ = SmartDashboard.putNumber(f"Motor {self._name} Voltage (Volts)", self._motor.get_motor_voltage().value)
-        _ = SmartDashboard.putBoolean(f"Motor {self._name} Stalled", self.get_stalled())
+        SmartDashboard.putNumber(f"Motor {self._name} Power (%)", self._motor.get() * 100)
+        SmartDashboard.putNumber(f"Motor {self._name} Stall Percentage", self.get_stall_percentage())
+        SmartDashboard.putNumber(f"Motor {self._name} Voltage (Volts)", self._motor.get_motor_voltage().value)
+        SmartDashboard.putBoolean(f"Motor {self._name} Stalled", self.get_stalled())
 
-    def log_diagnostics(self, log: DataLog) -> None:
-        stalled_log = BooleanLogEntry(log, f"Motor {self._name} Stalled")
-        stalled_log.append(self.get_stalled())
-        power_percent_log = DoubleLogEntry(log, f"Motor {self._name} Power (%)")
-        power_percent_log.append(self._motor.get()*100)
-        stall_percent_log = DoubleLogEntry(log, f"Motor {self._name} Stall Percentage")
-        stall_percent_log.append(self.get_stall_percentage())
-        voltage_log = DoubleLogEntry(log, f"Motor {self._name} Voltage (Volts)")
-        voltage_log.append(self._motor.get_motor_voltage().value)
+    def log_diagnostics(self) -> None:
+        if not self._logging_enabled:
+            return
+
+        self._stalled_log.append(self.get_stalled())
+        self._power_percent_log.append(self._motor.get()*100)
+        self._stall_percent_log.append(self.get_stall_percentage())
+        self._voltage_log.append(self._motor.get_motor_voltage().value)
 
     def set_raw_voltage(self, voltage: volts) -> None:
         '''

@@ -1,11 +1,9 @@
 from enum import Enum
 from typing import override
 
-from wpilib import SmartDashboard
-from wpimath.units import degrees, degrees_per_second, turns
-# from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters
-# from wpimath.trajectory import TrapezoidProfile
-
+from wpilib import DataLogManager, SmartDashboard
+from wpimath.units import degrees, degrees_per_second
+from wpiutil.log import BooleanLogEntry, DoubleLogEntry
 
 from phoenix6 import controls
 from phoenix6.hardware import CANcoder
@@ -30,11 +28,10 @@ class ExpoMotor(PowerMotor):
         feed_forward_config: SC_AngularFeedForwardConfig
         trapezoid_config: SC_TemplateMotorTrapezoidConfig
         angle_tolerance: degrees
-        gear_ratio: float = 1.0
+        gear_ratio: float
+        logging_enabled: bool,
         external_encoder: CANcoder | None = None
     '''
-    STALL_LIMIT: float = 0.75
-    STALL_THRESHOLD: float = 0.1
 
     def __init__(
             self,
@@ -43,10 +40,11 @@ class ExpoMotor(PowerMotor):
             feed_forward_config: SC_AngularFeedForwardConfig,
             expo_config: SC_ExpoConfig,
             angle_tolerance: degrees,
-            gear_ratio: float = 1.0,
+            gear_ratio: float,
+            logging_enabled: bool,
             external_encoder: CANcoder | None = None
         ) -> None:
-        super().__init__(motor_config)
+        super().__init__(motor_config, logging_enabled=logging_enabled)
 
         # Set up variables
         self._state: State = State.POWER
@@ -55,7 +53,6 @@ class ExpoMotor(PowerMotor):
 
         self._encoder: CANcoder | None = external_encoder
 
-        self._gear_ratio: float = gear_ratio
         self._angle_tolerance: degrees = angle_tolerance
 
         self._open_loop_request: controls.DutyCycleOut = controls.DutyCycleOut(0.0, enable_foc=False)
@@ -88,65 +85,72 @@ class ExpoMotor(PowerMotor):
         # The portion for the external encoder is here, but the rest of the configuration is in the PowerMotor class
         if type(self._motor_config) is TalonFXSConfiguration:
             if self._encoder is not None:
-                self._gear_ratio = 1.0
                 self._motor_config.external_feedback = ExternalFeedbackConfigs() \
                     .with_rotor_to_sensor_ratio(gear_ratio) \
                     .with_feedback_remote_sensor_id(self._encoder.device_id) \
                     .with_external_feedback_sensor_source(ExternalFeedbackSensorSourceValue.REMOTE_CANCODER)
+            else:
+                self._motor_config.external_feedback.sensor_to_mechanism_ratio = gear_ratio
 
         elif type(self._motor_config) is TalonFXConfiguration:
             if self._encoder is not None:
-                self._gear_ratio = 1.0
                 self._motor_config.feedback = FeedbackConfigs() \
                     .with_rotor_to_sensor_ratio(gear_ratio) \
                     .with_feedback_remote_sensor_id(self._encoder.device_id) \
                     .with_feedback_sensor_source(FeedbackSensorSourceValue.REMOTE_CANCODER)
+            else:
+                self._motor_config.feedback.sensor_to_mechanism_ratio = gear_ratio
+
         else:
             raise ValueError(f"Invalid motor type: {motor_config.motor_type}")
 
-        _ = self._motor.configurator.apply(self._motor_config)        
+        self._motor.configurator.apply(self._motor_config) # type: ignore
+
+        self._logging_enabled = logging_enabled
+        if logging_enabled:
+            self._position_log = DoubleLogEntry(DataLogManager.getLog(), f"/motors/{self._motor_name}/position_degrees")
+            self._velocity_log = DoubleLogEntry(DataLogManager.getLog(), f"/motors/{self._motor_name}/velocity_degrees_per_second")
+            self._at_target_position_log = BooleanLogEntry(DataLogManager.getLog(), f"/motors/{self._motor_name}/at_target_position")
 
 
 
     @override
     def periodic(self) -> None:
         '''
-        Handles controlling the motors in position mode and printing diagnostics
+        Handles controlling the motors in position mode
         '''
         match self._state:
             case State.POSITION:
                 self._motor.set_control(self._closed_loop_request)
             case State.POWER:
                 self._motor.set_control(self._open_loop_request)
-        if SmartDashboard.getBoolean(f"{self._motor_name} Diagnostics", defaultValue=False):
-            self.print_diagnostics()
 
-    def at_target_mechanism_position(self) -> bool:
+    def at_target_position(self) -> bool:
         '''
-        Returns whether the motor is at the target angle or not
+        Returns whether the mechanism is at the target angle or not
 
         Returns:
-            - bool: True if the motor is at the target angle, False otherwise
+            - bool: True if the mechanism is at the target angle, False otherwise
         '''
         return abs(self._closed_loop_request.position - self._motor.get_position().value) * 360.0 < self._angle_tolerance
 
-    def get_mechanism_position(self) -> degrees:
+    def get_position(self) -> degrees:
         '''
-        Returns the current angle of the motor
+        Returns the current angle of the mechanism
 
         Returns:
-            - degrees: The current angle of the motor
+            - degrees: The current angle of the mechanism
         '''
-        return (self._motor.get_position().value / self._gear_ratio) * 360.0
+        return self._motor.get_position().value * 360.0
 
     def get_velocity(self) -> degrees_per_second:
         '''
-        Returns the current velocity of the motor
+        Returns the current velocity of the mechanism
 
         Returns:
-            - degrees_per_second: The current velocity of the motor
+            - degrees_per_second: The current velocity of the mechanism
         '''
-        return (self._motor.get_velocity().value / self._gear_ratio) * 360.0
+        return self._motor.get_velocity().value * 360.0
 
     def set_power(self, power: float) -> None:
         '''
@@ -158,14 +162,14 @@ class ExpoMotor(PowerMotor):
         self._open_loop_request.output = power
         self._state = State.POWER
 
-    def set_mechanism_target_position(self, position: degrees) -> None:
+    def set_target_position(self, position: degrees) -> None:
         '''
         Sets the target angle of the motor
 
         Parameters:
             - angle (degrees): The angle to set the motor to
         '''
-        self._closed_loop_request.position = position * (self._gear_ratio / 360.0)
+        self._closed_loop_request.position = position / 360.0
         self._state = State.POSITION
         
 
@@ -175,16 +179,26 @@ class ExpoMotor(PowerMotor):
         '''
         Prints diagnostic information to Smart Dashboard
         '''
-        _ = SmartDashboard.putNumber(f"{self._motor_name} position (degrees)", self.get_position())
-        _ = SmartDashboard.putNumber(f"{self._motor_name} Velocity", self.get_velocity())
-        _ = SmartDashboard.putBoolean(f"{self._motor_name} At Target position", self.at_target_position())
+        SmartDashboard.putNumber(f"{self._motor_name} position (degrees)", self.get_position())
+        SmartDashboard.putNumber(f"{self._motor_name} Velocity", self.get_velocity())
+        SmartDashboard.putBoolean(f"{self._motor_name} At Target position", self.at_target_position())
         super().print_diagnostics()
 
-    def set_mechanism_position(self, position: turns) -> None:
+    def log_diagnostics(self) -> None:
+        if not self._logging_enabled:
+            return
+
+        self._position_log.append(self.get_position())
+        self._velocity_log.append(self.get_velocity())
+        self._at_target_position_log.append(self.at_target_position())
+
+        super().log_diagnostics()
+
+    def set_position(self, position: degrees) -> None:
         '''
-        Sets the encoder position of the motor
+        Sets the encoder position of the mechanism
 
         Parameters:
-            - position (turns): The encoder position to set the motor to
+            - position (degrees): The current angle of the mechanism
         '''
-        self._motor.set_position(position)
+        self._motor.set_position(position / 360.0)

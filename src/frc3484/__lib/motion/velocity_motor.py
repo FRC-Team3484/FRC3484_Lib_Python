@@ -1,15 +1,16 @@
 from typing import override
+from math import tau
 
-from wpilib import SmartDashboard
+from wpilib import DataLogManager, SmartDashboard
+from wpimath.units import revolutions_per_minute, radians_per_second
+from wpiutil.log import BooleanLogEntry, DoubleLogEntry
 
 from phoenix6 import controls
-from phoenix6.configs import CurrentLimitsConfigs, Slot0Configs
-from wpimath.units import turns
-from wpiutil.log import DataLog, BooleanLogEntry, DoubleLogEntry
+from phoenix6.configs import CurrentLimitsConfigs, Slot0Configs, TalonFXConfiguration, TalonFXSConfiguration
 
 from ..datatypes.motion_datatypes import SC_AngularFeedForwardConfig, SC_PIDConfig, SC_MotorConfig, SC_SpeedRequest
-from .power_motor import PowerMotor
 
+from .power_motor import PowerMotor
 
 class VelocityMotor(PowerMotor):
     '''
@@ -20,10 +21,9 @@ class VelocityMotor(PowerMotor):
         - current_config (SC_TemplateMotorCurrentConfig): Current limit settings for the motor
         - pid_config (SC_PIDConfig): The configuration for the PID controller
         - gear_ratio (float): The gear ratio of the motor
-        - tolerance (float): The tolerance for the target speed to consider it reached
+        - tolerance (revolutions_per_minute): The tolerance for the target speed to consider it reached
+        - logging_enabled (bool): Whether logging is enabled for this motor
     '''
-    STALL_LIMIT: float = 0.75
-    STALL_THRESHOLD: float = 0.1
 
     def __init__(
         self, 
@@ -31,13 +31,13 @@ class VelocityMotor(PowerMotor):
         pid_config: SC_PIDConfig, 
         feed_forward_config: SC_AngularFeedForwardConfig,
         gear_ratio: float, 
-        tolerance: float
+        tolerance: revolutions_per_minute,
+        logging_enabled: bool
     ) -> None:
-        super().__init__(motor_config)
+        
+        super().__init__(motor_config, logging_enabled)
 
-        self._tolerance: float = tolerance
-        self._gear_ratio: float = gear_ratio
-        self._motor_name: str | None = motor_config.motor_name
+        self._tolerance: revolutions_per_minute = tolerance
 
         self._open_loop_request: controls.DutyCycleOut = controls.DutyCycleOut(0.0, enable_foc=False)
         self._closed_loop_request: controls.VelocityVoltage = controls.VelocityVoltage(0.0, slot=0, enable_foc=False)
@@ -57,25 +57,29 @@ class VelocityMotor(PowerMotor):
             .with_k_s(feed_forward_config.S) \
             .with_k_g(feed_forward_config.G)
         
-        self._motor.configurator.apply(self._motor_config)
+        if type(self._motor_config) is TalonFXConfiguration:
+            self._motor_config.feedback.sensor_to_mechanism_ratio = gear_ratio
+        elif type(self._motor_config) is TalonFXSConfiguration:
+            self._motor_config.external_feedback.sensor_to_mechanism_ratio = gear_ratio
+
+        
+        self._motor.configurator.apply(self._motor_config)  # type: ignore
+
+        self._logging_enabled = logging_enabled
+        if self._logging_enabled:
+            self._speed_log = DoubleLogEntry(DataLogManager.getLog(), f"/motors/{self._name}/speed_rpm")
+            self._at_target_speed_log = BooleanLogEntry(DataLogManager.getLog(), f"/motors/{self._name}/at_target_speed")
 
     @override
     def periodic(self) -> None:
         '''
         Handles Smart Dashboard diagnostic information and actually controlling the motors
         '''
-        if not SmartDashboard.getBoolean(f"{self._motor_name} Test Mode", False):
-            if self._open_loop_request.output == 0.0 and self._closed_loop_request.velocity == 0.0:
-                self._motor.set_control(self._open_loop_request.with_output(0))
 
-            elif self._open_loop_request.output != 0.0:
-                self._motor.set_control(self._open_loop_request)
-            
-            else:
-                self._motor.set_control(self._closed_loop_request)
-
-        if SmartDashboard.getBoolean(f"{self._motor_name} Diagnostics", False):
-            self.print_diagnostics()
+        if self._closed_loop_request.velocity != 0.0:
+            self._motor.set_control(self._closed_loop_request)
+        else:
+            self._motor.set_control(self._open_loop_request)
     
     def set_mechanism_speed(self, speed: SC_SpeedRequest) -> None:
         '''
@@ -85,8 +89,25 @@ class VelocityMotor(PowerMotor):
             - speed (SC_TemplateMotorVelocityControl): The speed and power to set the motor to
         '''
         self._open_loop_request.output = speed.power
-        self._closed_loop_request.velocity = (speed.speed * self._gear_ratio) / 60
-        
+        self._closed_loop_request.velocity = (speed.speed) / 60
+
+    def get_mechanism_speed(self) -> revolutions_per_minute:
+        '''
+        Returns the current speed of the mechanism in RPM
+
+        Returns:
+            - revolutions_per_minute: The current speed of the mechanism
+        '''
+        return self._motor.get_velocity().value * 60
+
+    def get_mechanism_speed_rad_per_sec(self) -> radians_per_second:
+        '''
+        Returns the current speed of the mechanism in radians per second
+
+        Returns:
+            - radians_per_second: The current speed of the mechanism
+        '''
+        return self._motor.get_velocity().value * tau
 
     def mechanism_at_target_speed(self) -> bool:
         '''
@@ -99,7 +120,10 @@ class VelocityMotor(PowerMotor):
             return True
 
         elif self._open_loop_request.output != 0.0:
-            return (self._motor.get_velocity().value - self._closed_loop_request.velocity) * (1 if self._closed_loop_request.velocity >= 0 else -1) > 0
+            if self._closed_loop_request.velocity >= 0:
+                return self._motor.get_velocity().value > self._closed_loop_request.velocity
+            else:
+                return self._motor.get_velocity().value < self._closed_loop_request.velocity
 
         # Convert RPS to RPM, then subtract the target speed and compare to the tolerance
         return abs(self._motor.get_velocity().value - self._closed_loop_request.velocity) < self._tolerance
@@ -112,8 +136,6 @@ class VelocityMotor(PowerMotor):
         Parameters:
             - power (float): The power to set the motor to
         '''
-        # TODO: Have a boolean for testing mode to disable PID and feed forward
-        # TODO: Should this really override the set_speed method from PowerMotor?
         self._open_loop_request.output = power
         self._closed_loop_request.velocity = 0
     
@@ -122,16 +144,19 @@ class VelocityMotor(PowerMotor):
         '''
         Prints diagnostic information to Smart Dashboard
         '''
-        _ = SmartDashboard.putNumber(f"{self._motor_name} Speed (RPM)", self._motor.get_velocity().value * 60)
-        _ = SmartDashboard.putNumber(f"{self._motor_name} At Target RPM", self.at_target_speed())
+        SmartDashboard.putNumber(f"{self._name} Speed (RPM)", self.get_mechanism_speed())
+        SmartDashboard.putNumber(f"{self._name} At Target RPM", self.mechanism_at_target_speed())
         super().print_diagnostics()
 
     @override
-    def log_diagnostics(self, log: DataLog) -> None:
-        speed_log = DoubleLogEntry(log, f"{self._motor_name} speed (rpm)")
-        at_target_rpm_log = BooleanLogEntry(log, f"{self._motor_name} at target RPM")
+    def log_diagnostics(self) -> None:
+        '''
+        Logs diagnostic information to the data log
+        '''
+        if not self._logging_enabled:
+            return
 
-        speed_log.append(self._motor.get_velocity().value * 60)
-        at_target_rpm_log.append(self.at_target_speed())
+        self._speed_log.append(self.get_mechanism_speed())
+        self._at_target_speed_log.append(self.mechanism_at_target_speed())
 
-        return super().log_diagnostics(log)
+        super().log_diagnostics()
