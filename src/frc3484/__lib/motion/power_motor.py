@@ -71,7 +71,12 @@ class PowerMotor(Subsystem):
             self._stalled_log = BooleanLogEntry(log, f"/motors/{self._name}/stalled")
             self._power_percent_log = DoubleLogEntry(log, f"/motors/{self._name}/power_percent")
             self._stall_percent_log = DoubleLogEntry(log, f"/motors/{self._name}/stall_percent")
-            self._voltage_log = DoubleLogEntry(log, f"/motors/{self._name}/voltage")
+
+            self._supply_voltage_log=  DoubleLogEntry(log, f"/motors/{self._name}/supply_voltage")
+            self._supply_current_log = DoubleLogEntry(log, f"/motors/{self._name}/supply_current")
+            self._voltage_log = DoubleLogEntry(log, f"/motors/{self._name}/motor_voltage")
+            self._current_log = DoubleLogEntry(log, f"/motors/{self._name}/motor_current")
+            self._stator_current_log = DoubleLogEntry(log, f"/motors/{self._name}/stator_current")
 
     @property
     def device_id(self) -> int:
@@ -153,7 +158,12 @@ class PowerMotor(Subsystem):
         self._stalled_log.append(self.get_stalled())
         self._power_percent_log.append(self._motor.get()*100)
         self._stall_percent_log.append(self.get_stall_percentage())
+
+        self._supply_voltage_log.append(self._motor.get_supply_voltage().value)
+        self._supply_current_log.append(self._motor.get_supply_current().value)
         self._voltage_log.append(self._motor.get_motor_voltage().value)
+        self._current_log.append(self._motor.get_supply_current().value)
+        self._stator_current_log.append(self._motor.get_stator_current().value)
 
     def set_raw_voltage(self, voltage: volts) -> None:
         '''
