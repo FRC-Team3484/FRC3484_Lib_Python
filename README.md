@@ -3,12 +3,12 @@
 This repository holds common code for 3484 in Python
 
 ## Included Features
-- **Controls** - Abstracts the hardware controller inputs, to allow for any controller input to appear as any other type. This implements a more convenient interface for interacting with OI
+- [**Controls**](/src/frc3484/__lib/controls/README.md) - Abstracts the hardware controller inputs, to allow for any controller input to appear as any other type. This implements a more convenient interface for interacting with OI
 - **LEDs** - Common LED code for robots
-- **Motion** - Motor template classes, which allows for creating motors in subsystems without any of the repeated code for setup, PID, and feed forward.
-- **Pathfinding** - Code for handling pathfinding with Pathplanner, and for finely aligning to locations on the fields
-- **Pose Manipulation** - Helper functions for handling AprilTag poses and applying offsets to them
-- **Vision** - Code for getting the current pose of the robot based on visible AprilTags
+- [**Motion**](/src/frc3484/__lib/motion/README.md) - Motor template classes, which allows for creating motors in subsystems without any of the repeated code for setup, PID, and feed forward.
+- [**Pathfinding**](/src/frc3484/__lib/pathfinding/README.md) - Code for handling pathfinding with Pathplanner, and for finely aligning to locations on the fields
+- [**Pose Manipulation**](/src/frc3484/__lib/pose_manipulation/README.md) - Helper functions for handling AprilTag poses and applying offsets to them
+- [**Vision**](/src/frc3484/__lib/vision/README.md) - Code for getting the current pose of the robot based on visible AprilTags
 
 ## Installing
 ### Pip
